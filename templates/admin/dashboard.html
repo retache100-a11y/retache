@@ -1,0 +1,99 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<div class="page-title">📊 Dashboard RETACHE</div>
+
+<div class="stats-grid">
+  <div class="stat-card stat-verde">
+    <div class="stat-num">{{ total_transportistas }}</div>
+    <div class="stat-label">Transportistas activos</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ total_empresas }}</div>
+    <div class="stat-label">Empresas registradas</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ cargas_activas }}</div>
+    <div class="stat-label">Cargas disponibles</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ cargas_asignadas }}</div>
+    <div class="stat-label">Cargas asignadas</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ cargas_completadas }}</div>
+    <div class="stat-label">Viajes completados</div>
+  </div>
+  <div class="stat-card stat-verde">
+    <div class="stat-num">${{ "{:,.0f}".format(ingresos_estimados) }}</div>
+    <div class="stat-label">Valor de viajes completados</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ total_mensajes }}</div>
+    <div class="stat-label">Mensajes enviados</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">{{ total_notificaciones }}</div>
+    <div class="stat-label">Notificaciones generadas</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+  <div class="card">
+    <div class="card-title">📦 Cargas recientes</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Mercancía</th>
+          <th>Ruta</th>
+          <th>Precio</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for carga in cargas_recientes %}
+        <tr>
+          <td>{{ carga.tipo_mercancia }}</td>
+          <td style="font-size:12px;">{{ carga.origen_ciudad }} → {{ carga.destino_ciudad }}</td>
+          <td>${{ "{:,.0f}".format(carga.precio_ofrecido_mxn) }}</td>
+          <td>
+            {% if carga.estado == 'disponible' %}<span class="badge badge-verde">Disponible</span>
+            {% elif carga.estado == 'asignada' %}<span class="badge badge-azul">Asignada</span>
+            {% elif carga.estado == 'completada' %}<span class="badge badge-verde">Completada</span>
+            {% else %}<span class="badge badge-amber">{{ carga.estado }}</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🚛 Transportistas recientes</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Vehículo</th>
+          <th>Docs</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in transportistas_recientes %}
+        <tr>
+          <td>{{ t.nombre }} {{ t.apellidos }}</td>
+          <td style="font-size:12px;">{{ t.tipo_vehiculo or '—' }}</td>
+          <td>
+            {% if t.carta_porte_habilitada %}<span class="badge badge-verde">OK</span>
+            {% else %}<span class="badge badge-amber">Pendiente</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

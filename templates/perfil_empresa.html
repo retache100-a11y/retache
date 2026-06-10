@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ empresa.razon_social }}{% endblock %}
+{% block content %}
+<div style="max-width:800px; margin:0 auto;">
+  {% if request.query_params.get('registro') == 'exitoso' %}
+  <div class="alerta-verde" style="margin-bottom:20px;">✅ <strong>¡Registro exitoso!</strong> Tu empresa ya está registrada. Ahora puedes publicar cargas.</div>
+  {% endif %}
+  <div class="card" style="margin-bottom:16px;">
+    <h1 style="font-size:22px; font-weight:700; margin-bottom:4px;">{{ empresa.razon_social }}</h1>
+    {% if empresa.nombre_comercial and empresa.nombre_comercial != empresa.razon_social %}<div style="color:var(--texto-suave); font-size:14px; margin-bottom:8px;">{{ empresa.nombre_comercial }}</div>{% endif %}
+    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">
+      {% if empresa.acta_constitutiva_verificada %}<span class="badge badge-verde">🏢 Acta constitutiva verificada</span>{% else %}<span class="badge badge-amber">⚠️ Verificación pendiente</span>{% endif %}
+      {% if empresa.rfc_verificado %}<span class="badge badge-verde">RFC SAT ✓</span>{% endif %}
+      {% if empresa.giro %}<span class="badge badge-azul">{{ empresa.giro }}</span>{% endif %}
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num">{{ empresa.total_cargas_publicadas }}</div><div class="stat-label">Cargas publicadas</div></div>
+      <div class="stat-card"><div class="stat-num">{{ cargas_activas | length }}</div><div class="stat-label">Cargas activas</div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:15px; font-weight:600; margin-bottom:14px;">Datos fiscales</h2>
+    <div class="doc-row"><span>📋 RFC</span><span style="font-family:monospace;">{{ empresa.rfc }} {% if empresa.rfc_verificado %}<span class="badge badge-verde" style="margin-left:8px;">SAT ✓</span>{% endif %}</span></div>
+    <div class="doc-row"><span>📜 Acta constitutiva</span><span>{{ empresa.num_acta_constitutiva }} {% if empresa.acta_constitutiva_verificada %}<span class="badge badge-verde" style="margin-left:8px;">Verificada ✓</span>{% endif %}</span></div>
+    {% if empresa.municipio %}<div class="doc-row"><span>📍 Ubicación</span><span>{{ empresa.municipio }}{% if empresa.estado %}, {{ empresa.estado }}{% endif %}</span></div>{% endif %}
+    {% if empresa.nombre_contacto %}<div class="doc-row"><span>👤 Contacto</span><span>{{ empresa.nombre_contacto }}{% if empresa.puesto_contacto %} · {{ empresa.puesto_contacto }}{% endif %}</span></div>{% endif %}
+  </div>
+  {% if empresa.acta_constitutiva_verificada %}
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:15px; font-weight:600; margin-bottom:14px;">Publicar nueva carga</h2>
+    <form action="/empresas/{{ empresa.id }}/publicar-carga" method="POST">
+      <div class="form-row">
+        <div class="form-group"><label>Tipo de mercancía *</label><input type="text" name="tipo_mercancia" placeholder="Abarrotes, Electrodomésticos..." required></div>
+        <div class="form-group"><label>Título / referencia</label><input type="text" name="titulo" placeholder="Descripción corta"></div>
+      </div>
+      <div class="form-group"><label>Descripción</label><textarea name="descripcion" rows="2" placeholder="Detalles adicionales..."></textarea></div>
+      <div class="form-row">
+        <div class="form-group"><label>Origen — Ciudad *</label><input type="text" name="origen_ciudad" placeholder="Zamora" required></div>
+        <div class="form-group"><label>Origen — Estado *</label><input type="text" name="origen_estado" placeholder="Michoacán" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Destino — Ciudad *</label><input type="text" name="destino_ciudad" placeholder="CDMX" required></div>
+        <div class="form-group"><label>Destino — Estado *</label><input type="text" name="destino_estado" placeholder="Ciudad de México" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Peso total (kg) *</label><input type="number" name="peso_kg" placeholder="8500" min="1" required></div>
+        <div class="form-group"><label>Fecha de recolección *</label><input type="date" name="fecha_recoleccion" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Tipo de vehículo</label><select name="tipo_vehiculo_requerido"><option value="">Cualquier tipo</option><option>C2 (2 ejes)</option><option>C3 (3 ejes)</option><option>Rabón</option><option>Torton</option><option>Trailer (T3-S2)</option></select></div>
+        <div class="form-group"><label>Precio ofrecido (MXN) *</label><input type="number" name="precio_ofrecido_mxn" placeholder="11500" min="1" required></div>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%; padding:11px; font-size:15px; justify-content:center;">Publicar carga →</button>
+    </form>
+  </div>
+  {% endif %}
+  {% if cargas_activas %}
+  <h2 style="font-size:18px; font-weight:600; margin-bottom:12px;">Cargas activas</h2>
+  {% for carga in cargas_activas %}
+  <a href="/cargas/{{ carga.id }}" style="text-decoration:none; display:block;">
+    <div class="carga-card">
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><strong style="color:var(--texto);">{{ carga.tipo_mercancia }}</strong><span class="badge badge-verde">Disponible</span></div>
+      <div style="font-size:13px; color:var(--texto-suave); margin-bottom:6px;">📍 {{ carga.origen_ciudad }} → {{ carga.destino_ciudad }}</div>
+      <div class="carga-meta"><span>⚖️ {{ carga.peso_kg | int }} kg</span><span>📅 {{ carga.fecha_recoleccion.strftime('%d %b %Y') }}</span><span class="carga-precio">${{ "{:,.0f}".format(carga.precio_ofrecido_mxn) }}</span></div>
+    </div>
+  </a>
+  {% endfor %}
+  {% endif %}
+</div>
+{% endblock %}

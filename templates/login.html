@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Iniciar sesión{% endblock %}
+{% block content %}
+<div style="max-width:440px; margin:40px auto;">
+
+  <div style="text-align:center; margin-bottom:28px;">
+    <div style="width:52px;height:52px;border-radius:12px;background:var(--verde);display:inline-flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;">🚛</div>
+    <h1 style="font-size:24px; font-weight:700; margin-bottom:4px;">Bienvenido a RETACHE</h1>
+    <p style="color:var(--texto-suave);">Inicia sesión para continuar</p>
+  </div>
+
+  {% if error %}
+  <div style="background:var(--rojo-bg); border:1px solid #E24B4A; border-radius:8px; padding:12px 16px; font-size:13px; color:var(--rojo); margin-bottom:16px;">
+    ⚠️ {{ error }}
+  </div>
+  {% endif %}
+
+  <div class="card">
+    <div style="display:flex; margin-bottom:20px; background:var(--gris-bg); border-radius:8px; padding:4px;">
+      <button onclick="cambiarTipo('transportista')" id="btn-transportista"
+        style="flex:1; padding:8px; border:none; border-radius:6px; font-size:14px; font-weight:500; cursor:pointer; background:var(--verde); color:white; transition:all .15s;">
+        Soy transportista
+      </button>
+      <button onclick="cambiarTipo('empresa')" id="btn-empresa"
+        style="flex:1; padding:8px; border:none; border-radius:6px; font-size:14px; font-weight:500; cursor:pointer; background:transparent; color:var(--texto-suave); transition:all .15s;">
+        Soy empresa
+      </button>
+    </div>
+
+    <form action="/login" method="POST">
+      <input type="hidden" name="tipo" id="tipo-input" value="transportista">
+
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" name="email" placeholder="tu@correo.com" required>
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" name="contrasena" placeholder="Tu contraseña" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:15px; justify-content:center; margin-top:4px;">
+        Iniciar sesión →
+      </button>
+    </form>
+
+    <div style="text-align:center; margin-top:16px; font-size:13px; color:var(--texto-suave);">
+      ¿No tienes cuenta?
+      <a href="/transportistas/registro" id="link-registro">Regístrate como transportista</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function cambiarTipo(tipo) {
+    document.getElementById('tipo-input').value = tipo;
+    const btnT = document.getElementById('btn-transportista');
+    const btnE = document.getElementById('btn-empresa');
+    const link = document.getElementById('link-registro');
+
+    if (tipo === 'transportista') {
+      btnT.style.background = 'var(--verde)';
+      btnT.style.color = 'white';
+      btnE.style.background = 'transparent';
+      btnE.style.color = 'var(--texto-suave)';
+      link.href = '/transportistas/registro';
+      link.textContent = 'Regístrate como transportista';
+    } else {
+      btnE.style.background = 'var(--verde)';
+      btnE.style.color = 'white';
+      btnT.style.background = 'transparent';
+      btnT.style.color = 'var(--texto-suave)';
+      link.href = '/empresas/registro';
+      link.textContent = 'Regístrate como empresa';
+    }
+  }
+</script>
+{% endblock %}

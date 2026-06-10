@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{{ transportista.nombre }} {{ transportista.apellidos }}{% endblock %}
+{% block content %}
+<div style="max-width:800px; margin:0 auto;">
+  {% if request.query_params.get('registro') == 'exitoso' %}
+  <div class="alerta-verde" style="margin-bottom:20px;">✅ <strong>¡Registro exitoso!</strong> Tu perfil ha sido creado.</div>
+  {% endif %}
+  <div class="card" style="margin-bottom:16px;">
+    <div style="display:flex; gap:20px; align-items:flex-start; flex-wrap:wrap;">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--verde-bg);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#27500A;flex-shrink:0;">{{ transportista.nombre[0] }}{{ transportista.apellidos[0] }}</div>
+      <div style="flex:1;">
+        <h1 style="font-size:22px; font-weight:700; margin-bottom:4px;">{{ transportista.nombre }} {{ transportista.apellidos }}</h1>
+        <div style="color:var(--texto-suave); font-size:14px; margin-bottom:10px;">Transportista independiente</div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          {% if transportista.carta_porte_habilitada %}<span class="badge badge-verde">🛡️ Docs verificados</span>{% else %}<span class="badge badge-amber">⚠️ Docs pendientes</span>{% endif %}
+          {% if transportista.tipo_vehiculo %}<span class="badge badge-azul">🚛 {{ transportista.tipo_vehiculo }}</span>{% endif %}
+          {% if transportista.calificacion_promedio > 0 %}<span style="font-weight:600; color:var(--amber);">★ {{ "%.1f"|format(transportista.calificacion_promedio) }}</span><span style="font-size:13px; color:var(--texto-suave);">({{ resenas|length }} reseñas)</span>{% endif %}
+        </div>
+      </div>
+      <div>{% if transportista.disponible %}<span style="color:#1D9E75; font-weight:500;">● Disponible</span>{% else %}<span style="color:var(--amber); font-weight:500;">● En ruta</span>{% endif %}</div>
+    </div>
+  </div>
+  <div class="stats-grid" style="margin-bottom:16px;">
+    <div class="stat-card"><div class="stat-num">{{ transportista.total_viajes }}</div><div class="stat-label">Viajes totales</div></div>
+    <div class="stat-card"><div class="stat-num">{{ "%.0f"|format(transportista.porcentaje_puntualidad) }}%</div><div class="stat-label">Puntualidad</div></div>
+    <div class="stat-card"><div class="stat-num">{{ cargas_completadas }}</div><div class="stat-label">En RETACHE</div></div>
+    {% if transportista.capacidad_kg %}<div class="stat-card"><div class="stat-num">{{ "{:,.0f}".format(transportista.capacidad_kg) }}</div><div class="stat-label">kg capacidad</div></div>{% endif %}
+  </div>
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:16px; font-weight:600; margin-bottom:14px;">Documentos legales</h2>
+    <div class="doc-row"><span>📋 RFC</span><span>{{ transportista.rfc }} {% if transportista.rfc_verificado %}<span class="badge badge-verde" style="margin-left:8px;">SAT ✓</span>{% endif %}</span></div>
+    <div class="doc-row"><span>🪪 Licencia federal SICT</span><span class="badge {% if transportista.licencia_estado == 'vigente' %}badge-verde{% elif transportista.licencia_estado == 'por_vencer' %}badge-amber{% else %}badge-rojo{% endif %}">{{ transportista.licencia_estado }}</span></div>
+    <div class="doc-row"><span>🛡️ Seguro de carga</span><span class="badge {% if transportista.seguro_estado == 'vigente' %}badge-verde{% else %}badge-amber{% endif %}">{{ transportista.seguro_estado }}{% if transportista.seguro_cobertura_mxn %} · ${{ "{:,.0f}".format(transportista.seguro_cobertura_mxn) }}{% endif %}</span></div>
+    <div class="doc-row"><span>🚗 Tarjeta de circulación</span><span class="badge {% if transportista.tarjeta_circulacion_estado == 'vigente' %}badge-verde{% else %}badge-amber{% endif %}">{{ transportista.tarjeta_circulacion_estado }}</span></div>
+    <div class="doc-row"><span>🔧 Verificación vehicular</span><span class="badge {% if transportista.verificacion_vehicular_estado == 'vigente' %}badge-verde{% elif transportista.verificacion_vehicular_estado == 'por_vencer' %}badge-amber{% else %}badge-rojo{% endif %}">{{ transportista.verificacion_vehicular_estado }}</span></div>
+    <div class="doc-row"><span>📄 Carta Porte CFDI 4.0</span>{% if transportista.carta_porte_habilitada %}<span class="badge badge-verde">Habilitada ✓</span>{% else %}<span class="badge badge-rojo">No habilitada</span>{% endif %}</div>
+  </div>
+  {% if transportista.tipo_vehiculo %}
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:16px; font-weight:600; margin-bottom:14px;">Vehículo</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:14px;">
+      <div><span style="color:var(--texto-suave);">Tipo</span><br><strong>{{ transportista.tipo_vehiculo }}</strong></div>
+      {% if transportista.capacidad_kg %}<div><span style="color:var(--texto-suave);">Capacidad</span><br><strong>{{ "{:,.0f}".format(transportista.capacidad_kg) }} kg</strong></div>{% endif %}
+      {% if transportista.marca_vehiculo %}<div><span style="color:var(--texto-suave);">Marca / Modelo</span><br><strong>{{ transportista.marca_vehiculo }} {{ transportista.modelo_vehiculo }}</strong></div>{% endif %}
+      {% if transportista.anio_vehiculo %}<div><span style="color:var(--texto-suave);">Año</span><br><strong>{{ transportista.anio_vehiculo }}</strong></div>{% endif %}
+      {% if transportista.placa %}<div><span style="color:var(--texto-suave);">Placa</span><br><strong style="font-family:monospace;">{{ transportista.placa }}</strong></div>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% if rutas_frecuentes %}
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:16px; font-weight:600; margin-bottom:12px;">Rutas frecuentes</h2>
+    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      {% for ruta in rutas_frecuentes %}<span style="background:var(--gris-bg); border:1px solid var(--gris-borde); border-radius:20px; padding:5px 14px; font-size:13px; color:var(--texto-suave);">🛣️ {{ ruta }}</span>{% endfor %}
+    </div>
+    <p style="font-size:12px; color:var(--texto-suave); margin-top:10px;">💡 Estas rutas son ideales para aprovechar el viaje de regreso y evitar flete vacío.</p>
+  </div>
+  {% endif %}
+  {% if resenas %}
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:16px; font-weight:600; margin-bottom:14px;">Reseñas</h2>
+    {% for resena in resenas %}
+    <div style="background:var(--gris-bg); border-radius:10px; padding:12px 14px; margin-bottom:8px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+        <strong style="font-size:14px;">Empresa verificada</strong>
+        <span style="color:var(--amber);">{{ '★' * resena.calificacion }}{{ '☆' * (5 - resena.calificacion) }}</span>
+      </div>
+      {% if resena.comentario %}<p style="font-size:13px; color:var(--texto-suave); margin:0;">{{ resena.comentario }}</p>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+    <a href="/cargas" class="btn btn-primary">Ver cargas disponibles →</a>
+  </div>
+</div>
+{% endblock %}

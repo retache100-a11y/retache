@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}RETACHE{% endblock %} — Logística inversa MX</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --verde: #0F6E56; --verde-claro: #1D9E75; --verde-bg: #EAF3DE;
+      --gris-bg: #F7F7F5; --gris-borde: #E0DED6; --texto: #1A1A18;
+      --texto-suave: #6B6B68; --amber: #BA7517; --amber-bg: #FAEEDA;
+      --rojo-bg: #FCEBEB; --rojo: #A32D2D; --azul: #185FA5; --azul-bg: #E6F1FB;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--gris-bg); color: var(--texto); font-size: 15px; line-height: 1.6; }
+    a { color: var(--verde); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav { background: #fff; border-bottom: 1px solid var(--gris-borde); padding: 0 24px;
+      display: flex; align-items: center; height: 58px; gap: 24px;
+      position: sticky; top: 0; z-index: 100; }
+    .nav-logo { display: flex; align-items: center; gap: 10px;
+      font-weight: 600; font-size: 17px; color: var(--texto); text-decoration: none; }
+    .nav-logo-icon { width: 32px; height: 32px; background: var(--verde);
+      border-radius: 8px; display: flex; align-items: center;
+      justify-content: center; color: #9FE1CB; font-size: 18px; }
+    .nav-links { display: flex; gap: 4px; margin-left: 8px; }
+    .nav-links a { padding: 6px 14px; border-radius: 6px; font-size: 14px;
+      color: var(--texto-suave); font-weight: 500; transition: background .15s, color .15s; }
+    .nav-links a:hover { background: var(--gris-bg); color: var(--texto); text-decoration: none; }
+    .nav-links a.activo { background: var(--verde-bg); color: var(--verde); }
+    .nav-acciones { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px;
+      border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;
+      border: 1px solid var(--gris-borde); background: #fff; color: var(--texto);
+      transition: all .15s; text-decoration: none; }
+    .btn:hover { background: var(--gris-bg); text-decoration: none; }
+    .btn-primary { background: var(--verde); color: #fff; border-color: var(--verde); }
+    .btn-primary:hover { background: #0D5C47; }
+    main { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
+    .badge { display: inline-block; padding: 2px 10px; border-radius: 20px;
+      font-size: 12px; font-weight: 500; }
+    .badge-verde { background: var(--verde-bg); color: #27500A; }
+    .badge-amber { background: var(--amber-bg); color: #633806; }
+    .badge-rojo { background: var(--rojo-bg); color: var(--rojo); }
+    .badge-azul { background: var(--azul-bg); color: #0C447C; }
+    .card { background: #fff; border: 1px solid var(--gris-borde); border-radius: 12px; padding: 20px; }
+    label { display: block; font-size: 13px; color: var(--texto-suave); margin-bottom: 4px; font-weight: 500; }
+    input[type=text], input[type=email], input[type=password],
+    input[type=number], input[type=tel], input[type=date], select, textarea {
+      width: 100%; padding: 9px 12px; border: 1px solid var(--gris-borde);
+      border-radius: 8px; font-size: 14px; color: var(--texto);
+      background: #fff; outline: none; transition: border .15s; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { border-color: var(--verde); }
+    .form-group { margin-bottom: 14px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .alerta-verde { background: var(--verde-bg); border: 1px solid #97C459;
+      border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #27500A; }
+    .alerta-amber { background: var(--amber-bg); border: 1px solid #EF9F27;
+      border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #633806; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+    .stat-card { background: var(--gris-bg); border-radius: 10px; padding: 14px 16px; }
+    .stat-num { font-size: 26px; font-weight: 600; color: var(--texto); }
+    .stat-label { font-size: 12px; color: var(--texto-suave); margin-top: 2px; }
+    .doc-row { display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--gris-borde); font-size: 14px; }
+    .doc-row:last-child { border-bottom: none; }
+    .carga-card { background: #fff; border: 1px solid var(--gris-borde);
+      border-radius: 12px; padding: 16px 18px; margin-bottom: 10px;
+      transition: border-color .15s, box-shadow .15s; cursor: pointer; }
+    .carga-card:hover { border-color: var(--verde-claro); box-shadow: 0 2px 8px rgba(29,158,117,.12); }
+    .carga-meta { display: flex; gap: 16px; font-size: 13px; color: var(--texto-suave); margin-top: 8px; flex-wrap: wrap; }
+    .carga-precio { font-weight: 600; font-size: 16px; color: var(--texto); }
+    footer { text-align: center; padding: 32px; font-size: 13px;
+      color: var(--texto-suave); border-top: 1px solid var(--gris-borde); margin-top: 48px; }
+  </style>
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+<nav>
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-icon">🚛</div>
+    RETACHE
+  </a>
+  <div class="nav-links">
+    <a href="/cargas" {% if request.url.path == '/cargas' %}class="activo"{% endif %}>Cargas disponibles</a>
+    <a href="/transportistas/mapa" {% if 'mapa' in request.url.path %}class="activo"{% endif %}>Mapa</a>
+    {% if sesion and sesion.tipo == 'transportista' %}
+    <a href="/notificaciones" style="position:relative; padding:6px 14px;">
+      🔔
+      {% if notif_count and notif_count > 0 %}
+      <span style="position:absolute; top:2px; right:2px; background:#E24B4A; color:white;
+        border-radius:50%; width:16px; height:16px; font-size:10px; font-weight:700;
+        display:flex; align-items:center; justify-content:center; line-height:1;">
+        {{ notif_count if notif_count < 10 else '9+' }}
+      </span>
+      {% endif %}
+    </a>
+    {% endif %}
+  </div>
+  <div class="nav-acciones">
+    {% if sesion %}
+      <span style="font-size:13px; color:var(--texto-suave); margin-right:4px;">Hola, {{ sesion.nombre.split()[0] }}</span>
+      {% if sesion.tipo == 'transportista' %}
+        <a href="/transportistas/{{ sesion.id }}" class="btn">Mi perfil</a>
+      {% else %}
+        <a href="/empresas/{{ sesion.id }}" class="btn">Mi empresa</a>
+      {% endif %}
+      <a href="/logout" class="btn" style="color:var(--rojo);">Cerrar sesión</a>
+    {% else %}
+      <a href="/login" class="btn">Iniciar sesión</a>
+      <a href="/empresas/registro" class="btn btn-primary">Registrarme</a>
+    {% endif %}
+  </div>
+</nav>
+<main>
+  {% block content %}{% endblock %}
+</main>
+<footer>RETACHE © 2025 · Logística inversa para México · Zamora, Michoacán</footer>
+</body>
+</html>

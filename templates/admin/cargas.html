@@ -1,0 +1,44 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Cargas{% endblock %}
+{% block content %}
+
+<div class="page-title">📦 Todas las cargas ({{ cargas|length }})</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Mercancía</th>
+        <th>Ruta</th>
+        <th>Empresa</th>
+        <th>Transportista</th>
+        <th>Precio</th>
+        <th>Estado</th>
+        <th>Fecha</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in cargas %}
+      <tr>
+        <td style="font-weight:500; color:#E8E8E6;">{{ c.tipo_mercancia }}</td>
+        <td style="font-size:12px;">{{ c.origen_ciudad }} → {{ c.destino_ciudad }}</td>
+        <td style="font-size:12px;">{{ c.empresa.razon_social if c.empresa else '—' }}</td>
+        <td style="font-size:12px;">
+          {% if c.transportista %}{{ c.transportista.nombre }} {{ c.transportista.apellidos }}
+          {% else %}<span style="color:#8B8B8B;">Sin asignar</span>{% endif %}
+        </td>
+        <td>${{ "{:,.0f}".format(c.precio_ofrecido_mxn) }}</td>
+        <td>
+          {% if c.estado == 'disponible' %}<span class="badge badge-verde">Disponible</span>
+          {% elif c.estado == 'asignada' %}<span class="badge badge-azul">Asignada</span>
+          {% elif c.estado == 'completada' %}<span class="badge badge-verde">Completada</span>
+          {% elif c.estado == 'en_transito' %}<span class="badge badge-amber">En tránsito</span>
+          {% else %}<span class="badge badge-rojo">{{ c.estado }}</span>{% endif %}
+        </td>
+        <td style="font-size:12px; color:#8B8B8B;">{{ c.fecha_publicacion.strftime('%d %b %Y') }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

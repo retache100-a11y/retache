@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}{{ carga.titulo }}{% endblock %}
+{% block content %}
+<div style="max-width:800px; margin:0 auto;">
+  {% if request.query_params.get('publicada') == 'exitoso' %}<div class="alerta-verde" style="margin-bottom:20px;">✅ <strong>¡Carga publicada!</strong> Los transportistas ya pueden verla.</div>{% endif %}
+  <a href="/cargas" style="font-size:13px; color:var(--texto-suave);">← Volver a cargas</a>
+  <div class="card" style="margin:16px 0;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+      <div><h1 style="font-size:22px; font-weight:700; margin-bottom:4px;">{{ carga.tipo_mercancia }}</h1><div style="color:var(--texto-suave); font-size:14px;">{{ carga.titulo }}</div></div>
+      {% if carga.estado == 'disponible' %}<span class="badge badge-verde" style="font-size:13px; padding:6px 14px;">Disponible</span>
+      {% elif carga.estado == 'asignada' %}<span class="badge badge-azul" style="font-size:13px; padding:6px 14px;">Asignada</span>
+      {% elif carga.estado == 'completada' %}<span class="badge badge-verde" style="font-size:13px; padding:6px 14px;">Completada ✓</span>{% endif %}
+    </div>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:16px;">
+      <div><div style="font-size:12px; color:var(--texto-suave); margin-bottom:3px;">Origen</div><div style="font-weight:600;">📍 {{ carga.origen_ciudad }}, {{ carga.origen_estado }}</div></div>
+      <div><div style="font-size:12px; color:var(--texto-suave); margin-bottom:3px;">Destino</div><div style="font-weight:600;">📍 {{ carga.destino_ciudad }}, {{ carga.destino_estado }}</div></div>
+      <div><div style="font-size:12px; color:var(--texto-suave); margin-bottom:3px;">Peso</div><div style="font-weight:600;">⚖️ {{ carga.peso_kg | int }} kg</div></div>
+      <div><div style="font-size:12px; color:var(--texto-suave); margin-bottom:3px;">Vehículo requerido</div><div style="font-weight:600;">🚛 {{ carga.tipo_vehiculo_requerido or 'Cualquier tipo' }}</div></div>
+      <div><div style="font-size:12px; color:var(--texto-suave); margin-bottom:3px;">Fecha de recolección</div><div style="font-weight:600;">📅 {{ carga.fecha_recoleccion.strftime('%d %b %Y') }}</div></div>
+      <div><div style="font-size:12px; color:var(--texto-suave); margin-bottom:3px;">Precio ofrecido</div><div style="font-weight:600; font-size:18px; color:var(--verde);">${{ "{:,.0f}".format(carga.precio_ofrecido_mxn) }}{% if carga.precio_negociable %}<span style="font-size:13px; font-weight:400; color:var(--texto-suave);"> (negociable)</span>{% endif %}</div></div>
+    </div>
+    {% if carga.descripcion %}<div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--gris-borde);"><div style="font-size:12px; color:var(--texto-suave); margin-bottom:4px;">Descripción</div><p style="font-size:14px;">{{ carga.descripcion }}</p></div>{% endif %}
+  </div>
+  {% if carga.transportista %}
+  <div class="card" style="margin-bottom:16px; border-color:var(--verde-claro);">
+    <h2 style="font-size:15px; font-weight:600; margin-bottom:12px; color:var(--verde);">✅ Transportista asignado</h2>
+    <div style="display:flex; gap:14px; align-items:center; flex-wrap:wrap;">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--verde-bg);display:flex;align-items:center;justify-content:center;font-weight:700;color:#27500A;">{{ carga.transportista.nombre[0] }}{{ carga.transportista.apellidos[0] }}</div>
+      <div><div style="font-weight:600;">{{ carga.transportista.nombre }} {{ carga.transportista.apellidos }}</div><div style="font-size:13px; color:var(--texto-suave);">{{ carga.transportista.tipo_vehiculo }} · ⭐ {{ "%.1f"|format(carga.transportista.calificacion_promedio) }}</div></div>
+      <div style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">
+        <a href="/transportistas/{{ carga.transportista.id }}" class="btn">Ver perfil</a>
+        {% if not carga.carta_porte_generada %}<a href="/cargas/{{ carga.id }}/carta-porte" class="btn btn-primary">Generar Carta Porte</a>{% else %}<span class="badge badge-verde" style="padding:8px 14px;">📄 Carta Porte generada</span>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:15px; font-weight:600; margin-bottom:14px;">💬 Mensajes</h2>
+    <div style="min-height:100px; max-height:320px; overflow-y:auto; margin-bottom:14px; display:flex; flex-direction:column; gap:8px;">
+      {% for msg in mensajes %}
+      {% if msg.remitente_transportista_id %}
+      <div style="max-width:75%;"><div style="background:var(--gris-bg); border-radius:12px; border-bottom-left-radius:3px; padding:10px 14px; font-size:14px;">{{ msg.contenido }}</div><div style="font-size:11px; color:var(--texto-suave); margin-top:3px;">{{ msg.fecha_envio.strftime('%d %b %H:%M') }}</div></div>
+      {% else %}
+      <div style="max-width:75%; align-self:flex-end;"><div style="background:#185FA5; color:#E6F1FB; border-radius:12px; border-bottom-right-radius:3px; padding:10px 14px; font-size:14px;">{{ msg.contenido }}</div><div style="font-size:11px; color:var(--texto-suave); margin-top:3px; text-align:right;">{{ msg.fecha_envio.strftime('%d %b %H:%M') }}</div></div>
+      {% endif %}
+      {% else %}
+      <p style="color:var(--texto-suave); font-size:14px; text-align:center; padding:20px;">Aún no hay mensajes. Contacta al transportista para coordinar.</p>
+      {% endfor %}
+    </div>
+    <form action="/mensajes/enviar" method="POST" style="display:flex; gap:8px;">
+      <input type="hidden" name="carga_id" value="{{ carga.id }}">
+      <input type="hidden" name="remitente_tipo" value="empresa">
+      <input type="hidden" name="remitente_id" value="{{ carga.empresa_id }}">
+      <input type="text" name="contenido" placeholder="Escribe un mensaje..." style="flex:1;" required>
+      <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

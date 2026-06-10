@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Registro Empresa{% endblock %}
+{% block content %}
+<div style="max-width:680px; margin:0 auto;">
+  <h1 style="font-size:26px; font-weight:700; margin-bottom:6px;">Registro de empresa</h1>
+  <p style="color:var(--texto-suave); margin-bottom:20px;">Publica cargas y contrata transportistas verificados con Carta Porte incluida.</p>
+  <div class="alerta-verde" style="margin-bottom:20px;">🏢 <strong>Para empresas formales:</strong> Requerimos acta constitutiva para garantizar operaciones con respaldo legal y fiscal.</div>
+  <div class="card">
+    <form action="/empresas/registro" method="POST">
+      <h3 style="font-size:15px; font-weight:600; margin-bottom:14px;">1. Datos de la empresa</h3>
+      <div class="form-group"><label>Razón social *</label><input type="text" name="razon_social" placeholder="Empresa Ejemplo S.A. de C.V." required></div>
+      <div class="form-group"><label>Nombre comercial</label><input type="text" name="nombre_comercial" placeholder="Cómo se conoce la empresa (opcional)"></div>
+      <div class="form-group">
+        <label>Giro / sector *</label>
+        <select name="giro" required>
+          <option value="">— Selecciona el giro —</option>
+          <option>Manufactura</option><option>Abarrotes y alimentos</option>
+          <option>Autopartes</option><option>Textil y calzado</option>
+          <option>Construcción y materiales</option><option>Electrónica y electrodomésticos</option>
+          <option>Agricultura y agroindustria</option><option>Otro</option>
+        </select>
+      </div>
+      <hr style="border:none; border-top:1px solid var(--gris-borde); margin:20px 0;">
+      <h3 style="font-size:15px; font-weight:600; margin-bottom:14px;">2. Documentos fiscales y legales</h3>
+      <div class="form-group">
+        <label>RFC empresarial (persona moral — 12 caracteres) *</label>
+        <input type="text" name="rfc" placeholder="EEM010101AAA" maxlength="12" required style="font-family:monospace; text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+        <div style="font-size:12px; color:var(--texto-suave); margin-top:4px;">Formato: 3 letras + 6 dígitos + 3 alfanuméricos</div>
+      </div>
+      <div class="form-group"><label>Número de acta constitutiva *</label><input type="text" name="num_acta_constitutiva" placeholder="Escritura Pública No. 12,345" required></div>
+      <div class="alerta-amber" style="margin-bottom:20px;">⚠️ El <strong>acta constitutiva</strong> prueba la existencia legal de tu empresa. Es obligatoria para contratar transporte formal con Carta Porte.</div>
+      <hr style="border:none; border-top:1px solid var(--gris-borde); margin:20px 0;">
+      <h3 style="font-size:15px; font-weight:600; margin-bottom:14px;">3. Contacto y acceso</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Nombre del contacto *</label><input type="text" name="nombre_contacto" placeholder="Roberto García" required></div>
+        <div class="form-group"><label>Puesto</label><input type="text" name="puesto_contacto" placeholder="Gerente de Logística"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Correo electrónico *</label><input type="email" name="email" placeholder="contacto@empresa.com" required></div>
+        <div class="form-group"><label>Teléfono *</label><input type="tel" name="telefono" placeholder="3412345678" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Municipio</label><input type="text" name="municipio" placeholder="Zamora"></div>
+        <div class="form-group"><label>Estado</label><input type="text" name="estado_rep" placeholder="Michoacán"></div>
+      </div>
+      <div class="form-group"><label>Código postal</label><input type="text" name="cp" placeholder="59700" maxlength="5"></div>
+      <div class="form-group"><label>Contraseña *</label><input type="password" name="contrasena" placeholder="Mínimo 8 caracteres" required minlength="8"></div>
+      <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:15px; justify-content:center;">Crear cuenta de empresa →</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

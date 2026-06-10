@@ -1,0 +1,58 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Transportistas{% endblock %}
+{% block content %}
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+  <div class="page-title" style="margin:0;">🚛 Transportistas ({{ transportistas|length }})</div>
+</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>RFC</th>
+        <th>Vehículo</th>
+        <th>Carta Porte</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in transportistas %}
+      <tr>
+        <td>
+          <div style="font-weight:500; color:#E8E8E6;">{{ t.nombre }} {{ t.apellidos }}</div>
+          <div style="font-size:12px; color:#8B8B8B;">{{ t.email }}</div>
+        </td>
+        <td style="font-family:monospace; font-size:12px;">{{ t.rfc }}</td>
+        <td style="font-size:12px;">{{ t.tipo_vehiculo or '—' }}<br><span style="color:#8B8B8B;">{{ t.placa or '' }}</span></td>
+        <td>
+          {% if t.carta_porte_habilitada %}<span class="badge badge-verde">Habilitada</span>
+          {% else %}<span class="badge badge-amber">Pendiente</span>{% endif %}
+        </td>
+        <td>
+          {% if t.activo %}<span class="badge badge-verde">Activo</span>
+          {% else %}<span class="badge badge-rojo">Inactivo</span>{% endif %}
+        </td>
+        <td>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <a href="/transportistas/{{ t.id }}" target="_blank" class="btn btn-gris">Ver</a>
+            {% if not t.carta_porte_habilitada %}
+            <form action="/admin/transportistas/{{ t.id }}/verificar" method="POST" style="display:inline;">
+              <button type="submit" class="btn btn-verde">Verificar</button>
+            </form>
+            {% endif %}
+            <form action="/admin/transportistas/{{ t.id }}/toggle" method="POST" style="display:inline;">
+              <button type="submit" class="btn btn-rojo">
+                {% if t.activo %}Desactivar{% else %}Activar{% endif %}
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Mapa de transportistas{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  #mapa { height: 520px; border-radius: 12px; border: 1px solid var(--gris-borde); }
+</style>
+{% endblock %}
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+  <h1 style="font-size:24px; font-weight:700;">Mapa de transportistas</h1>
+  <span class="badge badge-verde" style="font-size:14px; padding:6px 16px;">{{ transportistas | length }} en el mapa</span>
+</div>
+<div id="mapa"></div>
+<div style="display:flex; gap:16px; margin-top:12px; font-size:13px; color:var(--texto-suave);">
+  <span><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#1D9E75; border:2px solid white;"></span> Disponible con Carta Porte</span>
+  <span><span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:#E24B4A; border:2px solid white;"></span> Documentos pendientes</span>
+</div>
+<script>
+  const mapa = L.map('mapa').setView([20.0, -102.5], 7);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(mapa);
+  fetch('/transportistas/api/disponibles')
+    .then(r => r.json())
+    .then(lista => {
+      lista.forEach(t => {
+        L.circleMarker([t.lat, t.lng], { radius: 12, fillColor: t.carta_porte ? '#1D9E75' : '#E24B4A', color: '#fff', weight: 2.5, fillOpacity: 0.92 })
+          .addTo(mapa)
+          .bindPopup(`<strong>${t.nombre}</strong><br>${t.tipo_vehiculo} · ${t.capacidad_kg.toLocaleString()} kg<br>⭐ ${t.calificacion} · ${t.total_viajes} viajes<br>${t.carta_porte ? '✅ Carta Porte habilitada' : '⚠️ Docs pendientes'}<br><a href="/transportistas/${t.id}">Ver perfil →</a>`);
+      });
+    });
+</script>
+<h2 style="font-size:18px; font-weight:600; margin:28px 0 14px;">Transportistas disponibles</h2>
+<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px,1fr)); gap:12px;">
+  {% for t in transportistas %}
+  <a href="/transportistas/{{ t.id }}" style="text-decoration:none;">
+    <div class="card" style="cursor:pointer;">
+      <div style="display:flex; gap:12px; align-items:center;">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--verde-bg);display:flex;align-items:center;justify-content:center;font-weight:700;color:#27500A;flex-shrink:0;">{{ t.nombre[0] }}{{ t.apellidos[0] }}</div>
+        <div>
+          <div style="font-weight:600; font-size:14px; color:var(--texto);">{{ t.nombre }} {{ t.apellidos[0] }}.</div>
+          <div style="font-size:12px; color:var(--texto-suave);">{{ t.tipo_vehiculo }} · {{ "{:,.0f}".format(t.capacidad_kg) }} kg</div>
+          {% if t.calificacion_promedio > 0 %}<div style="font-size:12px; color:var(--amber);">★ {{ "%.1f"|format(t.calificacion_promedio) }}</div>{% endif %}
+        </div>
+        <div style="margin-left:auto;"><div style="width:10px;height:10px;border-radius:50%;background:{% if t.carta_porte_habilitada %}#1D9E75{% else %}#E24B4A{% endif %};"></div></div>
+      </div>
+    </div>
+  </a>
+  {% else %}
+  <div style="grid-column:1/-1; text-align:center; padding:32px; color:var(--texto-suave);">
+    Sin transportistas registrados. <a href="/dev/cargar-datos-prueba">Cargar datos de prueba →</a>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Inicio{% endblock %}
+{% block head_extra %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  .hero { text-align: center; padding: 48px 0 40px; }
+  .hero h1 { font-size: 36px; font-weight: 700; line-height: 1.2; margin-bottom: 12px; }
+  .hero h1 span { color: var(--verde); }
+  .hero p { font-size: 17px; color: var(--texto-suave); max-width: 520px; margin: 0 auto 28px; }
+  .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  #mapa { height: 380px; border-radius: 12px; border: 1px solid var(--gris-borde); margin: 32px 0; }
+  .grid-cargas { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="hero">
+  <h1>No más camiones<br><span>vacíos de regreso</span></h1>
+  <p>Conectamos transportistas con empresas para aprovechar el viaje de vuelta. Logística inversa, documentación en regla y Carta Porte incluida.</p>
+  <div class="hero-btns">
+    <a href="/empresas/registro" class="btn btn-primary">Publicar una carga</a>
+    <a href="/transportistas/registro" class="btn">Registrarme como transportista</a>
+  </div>
+</div>
+<div class="stats-grid" style="margin-bottom:32px;">
+  <div class="stat-card"><div class="stat-num">{{ total_transportistas }}</div><div class="stat-label">Transportistas verificados</div></div>
+  <div class="stat-card"><div class="stat-num">{{ total_cargas }}</div><div class="stat-label">Cargas disponibles</div></div>
+  <div class="stat-card"><div class="stat-num">{{ total_completados }}</div><div class="stat-label">Viajes completados</div></div>
+  <div class="stat-card"><div class="stat-num">100%</div><div class="stat-label">Con Carta Porte SAT</div></div>
+</div>
+<div id="mapa"></div>
+<script>
+  const mapa = L.map('mapa').setView([19.98, -102.28], 7);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(mapa);
+  fetch('/transportistas/api/disponibles')
+    .then(r => r.json())
+    .then(lista => {
+      lista.forEach(t => {
+        L.circleMarker([t.lat, t.lng], { radius: 10, fillColor: '#1D9E75', color: '#fff', weight: 2, fillOpacity: 0.9 })
+          .addTo(mapa)
+          .bindPopup(`<strong>${t.nombre}</strong><br>${t.tipo_vehiculo} · ${t.capacidad_kg.toLocaleString()} kg<br>⭐ ${t.calificacion}<br><a href="/transportistas/${t.id}">Ver perfil →</a>`);
+      });
+    });
+</script>
+<h2 style="font-size:20px; font-weight:600; margin-bottom:16px;">Cargas disponibles</h2>
+<div class="grid-cargas">
+  {% for carga in cargas_recientes %}
+  <a href="/cargas/{{ carga.id }}" style="text-decoration:none;">
+    <div class="carga-card">
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <strong style="color:var(--texto);">{{ carga.tipo_mercancia }}</strong>
+        <span class="badge badge-verde">Disponible</span>
+      </div>
+      <div style="font-size:13px; color:var(--texto-suave); margin-bottom:8px;">📍 {{ carga.origen_ciudad }} → {{ carga.destino_ciudad }}</div>
+      <div class="carga-meta">
+        <span>⚖️ {{ carga.peso_kg | int }} kg</span>
+        <span>🚛 {{ carga.tipo_vehiculo_requerido or 'Cualquier tipo' }}</span>
+        <span class="carga-precio">${{ "{:,.0f}".format(carga.precio_ofrecido_mxn) }}</span>
+      </div>
+    </div>
+  </a>
+  {% else %}
+  <div style="grid-column:1/-1; text-align:center; padding:32px; color:var(--texto-suave);">
+    Aún no hay cargas. <a href="/dev/cargar-datos-prueba">Carga datos de prueba →</a>
+  </div>
+  {% endfor %}
+</div>
+{% if cargas_recientes %}<div style="text-align:center; margin-top:24px;"><a href="/cargas" class="btn">Ver todas las cargas →</a></div>{% endif %}
+{% endblock %}

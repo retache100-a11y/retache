@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Pagar flete{% endblock %}
+{% block content %}
+<div style="max-width:600px; margin:0 auto;">
+
+  <a href="/cargas/{{ carga.id }}" style="font-size:13px; color:var(--texto-suave);">← Volver a la carga</a>
+
+  <h1 style="font-size:24px; font-weight:700; margin:16px 0 4px;">Pagar flete</h1>
+  <p style="color:var(--texto-suave); margin-bottom:24px;">Completa el pago para confirmar el servicio de transporte.</p>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:15px; font-weight:600; margin-bottom:14px;">Resumen del servicio</h2>
+    <div class="doc-row">
+      <span>Mercancía</span>
+      <strong>{{ carga.tipo_mercancia }}</strong>
+    </div>
+    <div class="doc-row">
+      <span>Ruta</span>
+      <strong>{{ carga.origen_ciudad }} → {{ carga.destino_ciudad }}</strong>
+    </div>
+    <div class="doc-row">
+      <span>Peso</span>
+      <strong>{{ carga.peso_kg | int }} kg</strong>
+    </div>
+    <div class="doc-row">
+      <span>Precio del flete</span>
+      <strong>${{ "{:,.2f}".format(carga.precio_ofrecido_mxn) }}</strong>
+    </div>
+    <div class="doc-row">
+      <span>Comisión RETACHE (5%)</span>
+      <strong>${{ "{:,.2f}".format(comision_retache) }}</strong>
+    </div>
+    <div style="display:flex; justify-content:space-between; padding:14px 0 0; font-size:18px; font-weight:700;">
+      <span>Total a pagar</span>
+      <span style="color:var(--verde);">${{ "{:,.2f}".format(total) }} MXN</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:15px; font-weight:600; margin-bottom:16px;">Datos y método de pago</h2>
+    <form action="/pagos/carga/{{ carga.id }}/procesar" method="POST">
+
+      <div class="form-group">
+        <label>Nombre completo *</label>
+        <input type="text" name="nombre_cliente" placeholder="Tu nombre completo" required>
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico *</label>
+        <input type="email" name="email_cliente" placeholder="tu@correo.com" required>
+      </div>
+
+      <div class="form-group" style="margin-top:20px;">
+        <label style="margin-bottom:12px;">Método de pago *</label>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+          <label style="cursor:pointer;">
+            <input type="radio" name="metodo" value="oxxo" required style="display:none;" onclick="seleccionarMetodo('oxxo')">
+            <div id="btn-oxxo" style="border:2px solid var(--gris-borde); border-radius:10px; padding:16px; text-align:center; transition:all .15s;">
+              <div style="font-size:24px; margin-bottom:6px;">🏪</div>
+              <div style="font-weight:600; font-size:14px;">OXXO</div>
+              <div style="font-size:12px; color:var(--texto-suave);">Paga en efectivo</div>
+            </div>
+          </label>
+          <label style="cursor:pointer;">
+            <input type="radio" name="metodo" value="spei" style="display:none;" onclick="seleccionarMetodo('spei')">
+            <div id="btn-spei" style="border:2px solid var(--gris-borde); border-radius:10px; padding:16px; text-align:center; transition:all .15s;">
+              <div style="font-size:24px; margin-bottom:6px;">🏦</div>
+              <div style="font-weight:600; font-size:14px;">SPEI</div>
+              <div style="font-size:12px; color:var(--texto-suave);">Transferencia bancaria</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="alerta-amber" style="margin:16px 0;">
+        🧪 <strong>Modo de pruebas:</strong> Este pago es simulado y no cobra dinero real.
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:15px; justify-content:center;">
+        Generar referencia de pago →
+      </button>
+    </form>
+  </div>
+
+</div>
+
+<script>
+function seleccionarMetodo(metodo) {
+  document.getElementById('btn-oxxo').style.borderColor = metodo === 'oxxo' ? 'var(--verde)' : 'var(--gris-borde)';
+  document.getElementById('btn-oxxo').style.background = metodo === 'oxxo' ? 'var(--verde-bg)' : '';
+  document.getElementById('btn-spei').style.borderColor = metodo === 'spei' ? 'var(--verde)' : 'var(--gris-borde)';
+  document.getElementById('btn-spei').style.background = metodo === 'spei' ? 'var(--verde-bg)' : '';
+}
+</script>
+{% endblock %}

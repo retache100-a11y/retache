@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Registro Transportista{% endblock %}
+{% block content %}
+<div style="max-width:680px; margin:0 auto;">
+  <h1 style="font-size:26px; font-weight:700; margin-bottom:6px;">Registro de transportista</h1>
+  <p style="color:var(--texto-suave); margin-bottom:20px;">Completa tu perfil para recibir cargas y emitir Carta Porte en México.</p>
+  <div class="alerta-verde" style="margin-bottom:20px;">🛡️ <strong>Plataforma 100% legal:</strong> Validamos tu RFC con el SAT y verificamos tus documentos para cruzar cualquier caseta federal.</div>
+  <div class="card">
+    <form action="/transportistas/registro" method="POST">
+      <h3 style="font-size:15px; font-weight:600; margin-bottom:14px;">1. Datos personales</h3>
+      <div class="form-row">
+        <div class="form-group"><label>Nombre(s) *</label><input type="text" name="nombre" placeholder="Juan" required></div>
+        <div class="form-group"><label>Apellidos *</label><input type="text" name="apellidos" placeholder="Pérez Lara" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Correo electrónico *</label><input type="email" name="email" placeholder="juan@correo.com" required></div>
+        <div class="form-group"><label>Teléfono *</label><input type="tel" name="telefono" placeholder="3411234567" required></div>
+      </div>
+      <div class="form-group"><label>Contraseña *</label><input type="password" name="contrasena" placeholder="Mínimo 8 caracteres" required minlength="8"></div>
+      <hr style="border:none; border-top:1px solid var(--gris-borde); margin:20px 0;">
+      <h3 style="font-size:15px; font-weight:600; margin-bottom:14px;">2. Documentos fiscales y legales</h3>
+      <div class="form-group">
+        <label>RFC (persona física — 13 caracteres) *</label>
+        <input type="text" name="rfc" placeholder="PELJ850312KL4" maxlength="13" required style="font-family:monospace; text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()">
+        <div style="font-size:12px; color:var(--texto-suave); margin-top:4px;">Formato: 4 letras + 6 dígitos + 3 alfanuméricos</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Número de licencia federal SICT *</label><input type="text" name="num_licencia_federal" placeholder="LIC-FED-00123" required></div>
+        <div class="form-group"><label>Número de póliza de seguro de carga *</label><input type="text" name="num_poliza_seguro" placeholder="GNP-2024-789456" required></div>
+      </div>
+      <div class="alerta-amber" style="margin-bottom:20px;">⚠️ La <strong>licencia federal SICT</strong> y el <strong>seguro de carga</strong> son obligatorios para emitir Carta Porte 3.1.</div>
+      <hr style="border:none; border-top:1px solid var(--gris-borde); margin:20px 0;">
+      <h3 style="font-size:15px; font-weight:600; margin-bottom:14px;">3. Datos del vehículo</h3>
+      <div class="form-group">
+        <label>Tipo de unidad *</label>
+        <select name="tipo_vehiculo" required>
+          <option value="">— Selecciona —</option>
+          <option>C2 (2 ejes)</option><option>C3 (3 ejes)</option>
+          <option>Rabón</option><option>Torton</option><option>Trailer (T3-S2)</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Marca *</label><input type="text" name="marca_vehiculo" placeholder="Kenworth, Freightliner..." required></div>
+        <div class="form-group"><label>Modelo *</label><input type="text" name="modelo_vehiculo" placeholder="T370, M2..." required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Año *</label><input type="number" name="anio_vehiculo" placeholder="2019" min="2000" max="2026" required></div>
+        <div class="form-group"><label>Placa *</label><input type="text" name="placa" placeholder="MSJ4821B" required style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()"></div>
+      </div>
+      <div class="form-group"><label>Capacidad de carga (kg) *</label><input type="number" name="capacidad_kg" placeholder="12000" min="500" max="40000" step="100" required></div>
+      <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:15px; justify-content:center; margin-top:8px;">Crear mi perfil de transportista →</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

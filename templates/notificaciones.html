@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Notificaciones{% endblock %}
+{% block content %}
+<div style="max-width:680px; margin:0 auto;">
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <h1 style="font-size:24px; font-weight:700;">🔔 Notificaciones</h1>
+    {% if notificaciones %}
+    <a href="/notificaciones/marcar-todas-leidas" class="btn" style="font-size:13px;">Marcar todas como leídas</a>
+    {% endif %}
+  </div>
+
+  {% if not notificaciones %}
+  <div style="text-align:center; padding:48px; color:var(--texto-suave);">
+    <div style="font-size:48px; margin-bottom:12px;">🔔</div>
+    <div style="font-size:16px; font-weight:500; margin-bottom:8px;">Sin notificaciones por ahora</div>
+    <p style="font-size:14px;">Te avisaremos cuando haya cargas disponibles en tus rutas frecuentes.</p>
+    <a href="/cargas" class="btn btn-primary" style="margin-top:16px; display:inline-flex;">Ver cargas disponibles →</a>
+  </div>
+  {% endif %}
+
+  {% for notif in notificaciones %}
+  <a href="{{ notif.url }}" style="text-decoration:none; display:block;" onclick="marcarLeida({{ notif.id }})">
+    <div style="background:{% if not notif.leida %}#fff{% else %}var(--gris-bg){% endif %};
+      border:1px solid {% if not notif.leida %}var(--verde-claro){% else %}var(--gris-borde){% endif %};
+      border-radius:12px; padding:16px 18px; margin-bottom:10px;
+      transition: all .15s; display:flex; gap:14px; align-items:flex-start;">
+
+      <div style="width:40px; height:40px; border-radius:50%;
+        background:{% if not notif.leida %}var(--verde-bg){% else %}var(--gris-bg){% endif %};
+        display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;">
+        🚛
+      </div>
+
+      <div style="flex:1;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
+          <strong style="font-size:14px; color:var(--texto);">{{ notif.titulo }}</strong>
+          {% if not notif.leida %}
+          <span style="width:8px; height:8px; border-radius:50%; background:var(--verde-claro);
+            display:inline-block; flex-shrink:0; margin-top:4px; margin-left:8px;"></span>
+          {% endif %}
+        </div>
+        <div style="font-size:13px; color:var(--texto-suave); margin-bottom:6px;">{{ notif.mensaje }}</div>
+        <div style="font-size:12px; color:var(--texto-suave);">
+          {{ notif.fecha.strftime('%d %b %Y · %H:%M') }}
+        </div>
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+
+</div>
+
+<script>
+function marcarLeida(id) {
+  fetch(`/notificaciones/${id}/leida`, { method: 'POST' });
+}
+</script>
+{% endblock %}
