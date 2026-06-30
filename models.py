@@ -69,11 +69,16 @@ class Transportista(Base):
 
     fecha_registro = Column(DateTime, server_default=func.now())
     activo = Column(Boolean, default=True)
+    email_verificado = Column(Boolean, default=False)
+    token_verificacion = Column(String(200), nullable=True)
+    token_reset_password = Column(String(200), nullable=True)
+    token_reset_expira = Column(DateTime, nullable=True)
 
     cargas = relationship("Carga", back_populates="transportista")
     mensajes_enviados = relationship("Mensaje", foreign_keys="Mensaje.remitente_transportista_id", back_populates="remitente_transportista")
     resenas = relationship("Resena", back_populates="transportista")
     notificaciones = relationship("Notificacion", back_populates="transportista")
+    rutas_disponibles = relationship("RutaDisponible", back_populates="transportista")
 
 
 class Empresa(Base):
@@ -108,6 +113,10 @@ class Empresa(Base):
 
     fecha_registro = Column(DateTime, server_default=func.now())
     activo = Column(Boolean, default=True)
+    email_verificado = Column(Boolean, default=False)
+    token_verificacion = Column(String(200), nullable=True)
+    token_reset_password = Column(String(200), nullable=True)
+    token_reset_expira = Column(DateTime, nullable=True)
 
     cargas_publicadas = relationship("Carga", back_populates="empresa")
     mensajes_enviados = relationship("Mensaje", foreign_keys="Mensaje.remitente_empresa_id", back_populates="remitente_empresa")
@@ -202,3 +211,40 @@ class Notificacion(Base):
     fecha = Column(DateTime, server_default=func.now())
 
     transportista = relationship("Transportista", back_populates="notificaciones")
+
+
+class RutaDisponible(Base):
+    __tablename__ = "rutas_disponibles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    transportista_id = Column(Integer, ForeignKey("transportistas.id"), nullable=False)
+
+    origen_ciudad = Column(String(100), nullable=False)
+    origen_estado = Column(String(50), nullable=False)
+    destino_ciudad = Column(String(100), nullable=False)
+    destino_estado = Column(String(50), nullable=False)
+
+    fecha_salida = Column(DateTime, nullable=False)
+    capacidad_disponible_kg = Column(Float, nullable=False)
+    precio_por_kg = Column(Float, nullable=True)
+    precio_fijo = Column(Float, nullable=True)
+    precio_negociable = Column(Boolean, default=True)
+
+    activa = Column(Boolean, default=True)
+    fecha_publicacion = Column(DateTime, server_default=func.now())
+
+    transportista = relationship("Transportista", back_populates="rutas_disponibles")
+    mensajes = relationship("MensajeRuta", back_populates="ruta")
+
+
+class MensajeRuta(Base):
+    __tablename__ = "mensajes_ruta"
+
+    id = Column(Integer, primary_key=True, index=True)
+    ruta_id = Column(Integer, ForeignKey("rutas_disponibles.id"), nullable=False)
+    remitente_transportista_id = Column(Integer, ForeignKey("transportistas.id"), nullable=True)
+    remitente_empresa_id = Column(Integer, ForeignKey("empresas.id"), nullable=True)
+    contenido = Column(Text, nullable=False)
+    fecha_envio = Column(DateTime, server_default=func.now())
+
+    ruta = relationship("RutaDisponible", back_populates="mensajes")

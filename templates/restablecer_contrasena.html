@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Restablecer contraseña{% endblock %}
+{% block content %}
+<div style="max-width:440px; margin:40px auto;">
+  <div style="text-align:center; margin-bottom:28px;">
+    <div style="font-size:40px; margin-bottom:12px;">🔒</div>
+    <h1 style="font-size:24px; font-weight:700; margin-bottom:4px;">Nueva contraseña</h1>
+    <p style="color:var(--texto-suave);">Elige una contraseña segura para tu cuenta.</p>
+  </div>
+
+  {% if error %}
+  <div class="alerta-amber" style="margin-bottom:16px;">⚠️ {{ error }}</div>
+  <div style="text-align:center;">
+    <a href="/recuperar-contrasena" class="btn btn-primary">Solicitar nuevo enlace</a>
+  </div>
+  {% elif token %}
+  <div class="card">
+    <form action="/restablecer-contrasena/{{ token }}" method="POST">
+      <div class="form-group">
+        <label>Nueva contraseña *</label>
+        <input type="password" name="nueva_contrasena" placeholder="Mínimo 8 caracteres" required minlength="8">
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:15px; justify-content:center;">
+        Guardar nueva contraseña →
+      </button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

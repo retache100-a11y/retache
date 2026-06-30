@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Verificación de email{% endblock %}
+{% block content %}
+<div style="max-width:480px; margin:60px auto; text-align:center;">
+
+  {% if error %}
+  <div style="font-size:56px; margin-bottom:16px;">❌</div>
+  <h1 style="font-size:24px; font-weight:700; margin-bottom:8px;">Enlace inválido</h1>
+  <p style="color:var(--texto-suave); margin-bottom:24px;">El enlace de verificación ha expirado o no es válido.</p>
+  <a href="/login" class="btn btn-primary">Ir al inicio de sesión</a>
+
+  {% else %}
+  <div style="font-size:56px; margin-bottom:16px;">✅</div>
+  <h1 style="font-size:24px; font-weight:700; margin-bottom:8px;">¡Email verificado!</h1>
+  <p style="color:var(--texto-suave); margin-bottom:24px;">
+    Hola <strong>{{ nombre }}</strong>, tu cuenta ha sido verificada correctamente. Ya puedes usar RETACHE.
+  </p>
+  <a href="/login" class="btn btn-primary">Iniciar sesión →</a>
+  {% endif %}
+
+</div>
+{% endblock %}

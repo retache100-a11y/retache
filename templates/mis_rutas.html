@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Mis rutas publicadas{% endblock %}
+{% block content %}
+<div style="max-width:800px; margin:0 auto;">
+
+  {% if publicada == 'exitoso' %}
+  <div class="alerta-verde" style="margin-bottom:20px;">
+    ✅ <strong>¡Ruta publicada!</strong> Las empresas ya pueden verte y contactarte.
+  </div>
+  {% endif %}
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <h1 style="font-size:24px; font-weight:700;">Mis rutas de regreso</h1>
+    <a href="/rutas/publicar" class="btn btn-primary">+ Publicar nueva ruta</a>
+  </div>
+
+  {% if not rutas %}
+  <div style="text-align:center; padding:48px; color:var(--texto-suave);">
+    <div style="font-size:40px; margin-bottom:12px;">🛣️</div>
+    <div style="font-size:16px; font-weight:500; margin-bottom:8px;">No has publicado ninguna ruta aún</div>
+    <p style="font-size:14px; margin-bottom:20px;">Publica tu ruta de regreso para que las empresas te encuentren y no regreses vacío.</p>
+    <a href="/rutas/publicar" class="btn btn-primary">Publicar mi primera ruta →</a>
+  </div>
+  {% endif %}
+
+  {% for ruta in rutas %}
+  <div class="card" style="margin-bottom:12px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+      <div>
+        <div style="font-size:15px; font-weight:600; color:var(--texto);">
+          📍 {{ ruta.origen_ciudad }} → {{ ruta.destino_ciudad }}
+        </div>
+        <div class="carga-meta" style="margin-top:6px;">
+          <span>📅 {{ ruta.fecha_salida.strftime('%d %b %Y') }}</span>
+          <span>⚖️ {{ "{:,.0f}".format(ruta.capacidad_disponible_kg) }} kg</span>
+          {% if ruta.precio_fijo %}
+          <span>${{ "{:,.0f}".format(ruta.precio_fijo) }}</span>
+          {% else %}
+          <span style="color:var(--amber);">Precio negociable</span>
+          {% endif %}
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        {% if ruta.activa %}
+        <span class="badge badge-verde">Activa</span>
+        <form action="/rutas/desactivar/{{ ruta.id }}" method="POST" style="display:inline;">
+          <button type="submit" class="btn" style="font-size:13px; color:var(--rojo);">Desactivar</button>
+        </form>
+        {% else %}
+        <span class="badge badge-rojo">Inactiva</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+
+</div>
+{% endblock %}

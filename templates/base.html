@@ -83,8 +83,13 @@
     RETACHE
   </a>
   <div class="nav-links">
+    <a href="/como-funciona" {% if 'como-funciona' in request.url.path %}class="activo"{% endif %}>¿Cómo funciona?</a>
     <a href="/cargas" {% if request.url.path == '/cargas' %}class="activo"{% endif %}>Cargas disponibles</a>
     <a href="/transportistas/mapa" {% if 'mapa' in request.url.path %}class="activo"{% endif %}>Mapa</a>
+    <a href="/rutas/buscar" {% if 'rutas' in request.url.path and 'buscar' in request.url.path %}class="activo"{% endif %}>Transportistas disponibles</a>
+{% if sesion and sesion.tipo == 'transportista' %}
+<a href="/rutas/publicar" {% if 'publicar' in request.url.path %}class="activo"{% endif %}>Publicar ruta</a>
+{% endif %}
     {% if sesion and sesion.tipo == 'transportista' %}
     <a href="/notificaciones" style="position:relative; padding:6px 14px;">
       🔔
@@ -116,6 +121,13 @@
 <main>
   {% block content %}{% endblock %}
 </main>
-<footer>RETACHE © 2025 · Logística inversa para México · Zamora, Michoacán</footer>
+<footer>
+  RETACHE © 2025 · Logística inversa para México · La Piedad, Michoacán
+  <div style="margin-top:8px;">
+    <a href="/terminos" style="color:var(--texto-suave); font-size:12px; margin:0 8px;">Términos y condiciones</a>
+    <a href="/privacidad" style="color:var(--texto-suave); font-size:12px; margin:0 8px;">Aviso de privacidad</a>
+    <a href="/recuperar-contrasena" style="color:var(--texto-suave); font-size:12px; margin:0 8px;">¿Olvidaste tu contraseña?</a>
+  </div>
+</footer>
 </body>
 </html>

@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Chat — {{ ruta.origen_ciudad }} → {{ ruta.destino_ciudad }}{% endblock %}
+{% block content %}
+<div style="max-width:700px; margin:0 auto;">
+
+  <a href="/rutas/buscar" style="font-size:13px; color:var(--texto-suave);">← Volver a transportistas disponibles</a>
+
+  <div class="card" style="margin:16px 0;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+      <div>
+        <div style="font-weight:600; font-size:16px; color:var(--texto);">
+          🚛 {{ ruta.transportista.nombre }} {{ ruta.transportista.apellidos }}
+        </div>
+        <div style="font-size:13px; color:var(--texto-suave); margin-top:4px;">
+          📍 {{ ruta.origen_ciudad }} → {{ ruta.destino_ciudad }} · 📅 {{ ruta.fecha_salida.strftime('%d %b %Y') }} · ⚖️ {{ "{:,.0f}".format(ruta.capacidad_disponible_kg) }} kg
+        </div>
+      </div>
+      {% if ruta.transportista.carta_porte_habilitada %}
+      <span class="badge badge-verde">🛡️ Carta Porte habilitada</span>
+      {% endif %}
+    </div>
+
+    {% if sesion and sesion.tipo == 'empresa' and ruta.activa %}
+    <div style="margin-top:14px;">
+      <a href="/rutas/{{ ruta.id }}/cerrar-trato" class="btn btn-primary">✅ Cerrar trato con este transportista</a>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2 style="font-size:15px; font-weight:600; margin-bottom:14px;">💬 Conversación</h2>
+
+    <div style="min-height:160px; max-height:380px; overflow-y:auto; margin-bottom:14px; display:flex; flex-direction:column; gap:8px;">
+      {% for msg in mensajes %}
+      {% if msg.remitente_transportista_id %}
+      <div style="max-width:75%;">
+        <div style="background:var(--gris-bg); border-radius:12px; border-bottom-left-radius:3px; padding:10px 14px; font-size:14px;">
+          {{ msg.contenido }}
+        </div>
+        <div style="font-size:11px; color:var(--texto-suave); margin-top:3px;">{{ msg.fecha_envio.strftime('%d %b %H:%M') }}</div>
+      </div>
+      {% else %}
+      <div style="max-width:75%; align-self:flex-end;">
+        <div style="background:#185FA5; color:#E6F1FB; border-radius:12px; border-bottom-right-radius:3px; padding:10px 14px; font-size:14px;">
+          {{ msg.contenido }}
+        </div>
+        <div style="font-size:11px; color:var(--texto-suave); margin-top:3px; text-align:right;">{{ msg.fecha_envio.strftime('%d %b %H:%M') }}</div>
+      </div>
+      {% endif %}
+      {% else %}
+      <p style="color:var(--texto-suave); font-size:14px; text-align:center; padding:20px;">
+        Aún no hay mensajes. {% if sesion and sesion.tipo == 'empresa' %}Inicia la conversación con el transportista.{% else %}Espera a que una empresa te contacte.{% endif %}
+      </p>
+      {% endfor %}
+    </div>
+
+    {% if sesion %}
+    <form action="/rutas/{{ ruta.id }}/chat/enviar" method="POST" style="display:flex; gap:8px;">
+      <input type="text" name="contenido" placeholder="Escribe un mensaje..." style="flex:1;" required>
+      <button type="submit" class="btn btn-primary">Enviar</button>
+    </form>
+    {% else %}
+    <div class="alerta-amber">
+      Debes <a href="/login">iniciar sesión</a> para contactar a este transportista.
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

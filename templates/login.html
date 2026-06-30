@@ -9,6 +9,12 @@
     <p style="color:var(--texto-suave);">Inicia sesión para continuar</p>
   </div>
 
+  {% if request.query_params.get('reset') == 'exitoso' %}
+  <div class="alerta-verde" style="margin-bottom:16px;">
+    ✅ Tu contraseña fue restablecida. Inicia sesión con tu nueva contraseña.
+  </div>
+  {% endif %}
+
   {% if error %}
   <div style="background:var(--rojo-bg); border:1px solid #E24B4A; border-radius:8px; padding:12px 16px; font-size:13px; color:var(--rojo); margin-bottom:16px;">
     ⚠️ {{ error }}
@@ -44,7 +50,11 @@
       </button>
     </form>
 
-    <div style="text-align:center; margin-top:16px; font-size:13px; color:var(--texto-suave);">
+    <div style="text-align:center; margin-top:12px; font-size:13px; color:var(--texto-suave);">
+      <a href="/recuperar-contrasena" style="color:var(--texto-suave);">¿Olvidaste tu contraseña?</a>
+    </div>
+
+    <div style="text-align:center; margin-top:12px; font-size:13px; color:var(--texto-suave);">
       ¿No tienes cuenta?
       <a href="/transportistas/registro" id="link-registro">Regístrate como transportista</a>
     </div>

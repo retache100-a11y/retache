@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Transportistas disponibles{% endblock %}
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+  <div>
+    <h1 style="font-size:24px; font-weight:700; margin-bottom:4px;">Transportistas disponibles</h1>
+    <p style="color:var(--texto-suave); font-size:14px;">Transportistas con espacio libre en su viaje de regreso</p>
+  </div>
+  <span class="badge badge-verde" style="font-size:14px; padding:6px 16px;">{{ rutas | length }} disponibles</span>
+</div>
+
+<form method="GET" action="/rutas/buscar" style="background:#fff; border:1px solid var(--gris-borde); border-radius:12px; padding:16px; margin-bottom:20px; display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+  <div class="form-group" style="margin:0; flex:1; min-width:140px;">
+    <label>Origen (ciudad del transportista)</label>
+    <input type="text" name="origen" value="{{ filtro_origen }}" placeholder="Ej. CDMX">
+  </div>
+  <div class="form-group" style="margin:0; flex:1; min-width:140px;">
+    <label>Destino (a donde va)</label>
+    <input type="text" name="destino" value="{{ filtro_destino }}" placeholder="Ej. Zamora">
+  </div>
+  <button type="submit" class="btn btn-primary">Buscar</button>
+  {% if filtro_origen or filtro_destino %}<a href="/rutas/buscar" class="btn">Limpiar</a>{% endif %}
+</form>
+
+{% for ruta in rutas %}
+<div class="carga-card">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+    <div>
+      <div style="font-weight:600; font-size:15px; color:var(--texto);">
+        🚛 {{ ruta.transportista.nombre }} {{ ruta.transportista.apellidos }}
+      </div>
+      <div style="font-size:13px; color:var(--texto-suave); margin-top:2px;">
+        {{ ruta.transportista.tipo_vehiculo }} · ⭐ {{ "%.1f"|format(ruta.transportista.calificacion_promedio) }}
+      </div>
+    </div>
+    {% if ruta.transportista.carta_porte_habilitada %}
+    <span class="badge badge-verde">🛡️ Carta Porte habilitada</span>
+    {% endif %}
+  </div>
+
+  <div style="font-size:15px; font-weight:500; color:var(--texto); margin-bottom:8px;">
+    📍 {{ ruta.origen_ciudad }}, {{ ruta.origen_estado }} → {{ ruta.destino_ciudad }}, {{ ruta.destino_estado }}
+  </div>
+
+  <div class="carga-meta">
+    <span>📅 Sale el {{ ruta.fecha_salida.strftime('%d %b %Y') }}</span>
+    <span>⚖️ {{ "{:,.0f}".format(ruta.capacidad_disponible_kg) }} kg disponibles</span>
+    {% if ruta.precio_fijo %}
+    <span class="carga-precio">${{ "{:,.0f}".format(ruta.precio_fijo) }}</span>
+    {% else %}
+    <span class="carga-precio" style="color:var(--amber);">Precio negociable</span>
+    {% endif %}
+  </div>
+
+  <div style="margin-top:12px; display:flex; gap:8px;">
+    <a href="/transportistas/{{ ruta.transportista.id }}" class="btn">Ver perfil</a>
+    <a href="/rutas/{{ ruta.id }}/chat" class="btn btn-primary">💬 Contactar →</a>
+  </div>
+</div>
+{% else %}
+<div style="text-align:center; padding:48px; color:var(--texto-suave);">
+  <div style="font-size:40px; margin-bottom:12px;">🚛</div>
+  No hay transportistas disponibles con esos filtros.<br><br>
+  <a href="/rutas/buscar" class="btn">Ver todos los disponibles</a>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Recuperar contraseña{% endblock %}
+{% block content %}
+<div style="max-width:440px; margin:40px auto;">
+  <div style="text-align:center; margin-bottom:28px;">
+    <div style="font-size:40px; margin-bottom:12px;">🔑</div>
+    <h1 style="font-size:24px; font-weight:700; margin-bottom:4px;">Recuperar contraseña</h1>
+    <p style="color:var(--texto-suave);">Te enviaremos un enlace para restablecer tu contraseña.</p>
+  </div>
+
+  {% if enviado %}
+  <div class="alerta-verde">
+    ✅ <strong>¡Listo!</strong> Si ese email está registrado, recibirás un enlace en tu correo en los próximos minutos. Revisa también tu carpeta de spam.
+  </div>
+  {% else %}
+
+  {% if error %}
+  <div class="alerta-amber" style="margin-bottom:16px;">⚠️ {{ error }}</div>
+  {% endif %}
+
+  <div class="card">
+    <form action="/recuperar-contrasena" method="POST">
+      <div class="form-group">
+        <label>Tipo de cuenta</label>
+        <select name="tipo" required>
+          <option value="transportista">Soy transportista</option>
+          <option value="empresa">Soy empresa</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <input type="email" name="email" placeholder="tu@correo.com" required>
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:15px; justify-content:center;">
+        Enviar enlace de recuperación →
+      </button>
+    </form>
+    <div style="text-align:center; margin-top:16px; font-size:13px; color:var(--texto-suave);">
+      <a href="/login">← Volver al inicio de sesión</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -16,6 +16,8 @@ from routers import transportistas
 from routers import empresas
 from admin import router as admin_router
 from pagos import router as pagos_router
+from rutas import router as rutas_router
+from cuenta import router as cuenta_router
 from auth import hash_contrasena, crear_sesion, get_sesion_actual
 from notificaciones import (
     notificar_nueva_carga, obtener_notificaciones,
@@ -33,6 +35,8 @@ app.include_router(transportistas.router)
 app.include_router(empresas.router)
 app.include_router(admin_router)
 app.include_router(pagos_router)
+app.include_router(rutas_router)
+app.include_router(cuenta_router)
 
 def contexto(request: Request, db: Session = None, **kwargs):
     sesion = get_sesion_actual(request)
@@ -41,6 +45,18 @@ def contexto(request: Request, db: Session = None, **kwargs):
         notif_count = contar_no_leidas(db, sesion["id"])
     return {"request": request, "sesion": sesion, "notif_count": notif_count, **kwargs}
 
+@app.get("/terminos", response_class=HTMLResponse)
+async def terminos(request: Request, db: Session = Depends(get_db)):
+    return templates.TemplateResponse("terminos.html", contexto(request, db))
+
+
+@app.get("/privacidad", response_class=HTMLResponse)
+async def privacidad(request: Request, db: Session = Depends(get_db)):
+    return templates.TemplateResponse("privacidad.html", contexto(request, db))
+
+@app.get("/como-funciona", response_class=HTMLResponse)
+async def como_funciona(request: Request, db: Session = Depends(get_db)):
+    return templates.TemplateResponse("como_funciona.html", contexto(request, db))
 
 @app.get("/", response_class=HTMLResponse)
 async def inicio(request: Request, db: Session = Depends(get_db)):

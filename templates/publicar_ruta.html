@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Publicar ruta de regreso{% endblock %}
+{% block content %}
+<div style="max-width:640px; margin:0 auto;">
+  <h1 style="font-size:24px; font-weight:700; margin-bottom:6px;">Publicar ruta de regreso</h1>
+  <p style="color:var(--texto-suave); margin-bottom:20px;">Avisa qué espacio tienes disponible en tu viaje de regreso para no regresar vacío.</p>
+
+  <div class="alerta-verde" style="margin-bottom:20px;">
+    🚛 <strong>Logística inversa:</strong> Las empresas podrán ver tu ruta y contactarte directamente para aprovechar tu viaje de regreso.
+  </div>
+
+  <div class="card">
+    <form action="/rutas/publicar" method="POST">
+      <h3 style="font-size:15px; font-weight:600; margin-bottom:14px;">Ruta de regreso</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ciudad de origen (donde estás) *</label>
+          <input type="text" name="origen_ciudad" placeholder="Ej. CDMX" required>
+        </div>
+        <div class="form-group">
+          <label>Estado *</label>
+          <input type="text" name="origen_estado" placeholder="Ciudad de México" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ciudad de destino (a donde regresas) *</label>
+          <input type="text" name="destino_ciudad" placeholder="Ej. Zamora" required>
+        </div>
+        <div class="form-group">
+          <label>Estado *</label>
+          <input type="text" name="destino_estado" placeholder="Michoacán" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Fecha de salida *</label>
+          <input type="date" name="fecha_salida" required>
+        </div>
+        <div class="form-group">
+          <label>Capacidad disponible (kg) *</label>
+          <input type="number" name="capacidad_disponible_kg" placeholder="Ej. 8000" min="100" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Precio fijo por el viaje (MXN) — opcional</label>
+        <input type="number" name="precio_fijo" placeholder="Ej. 9500">
+      </div>
+      <div class="alerta-amber" style="margin-bottom:16px;">
+        💡 Si dejas el precio vacío, las empresas podrán hacerte una oferta y negociar contigo directamente.
+      </div>
+      <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:15px; justify-content:center;">
+        Publicar mi ruta de regreso →
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

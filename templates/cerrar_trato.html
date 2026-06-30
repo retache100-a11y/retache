@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Cerrar trato{% endblock %}
+{% block content %}
+<div style="max-width:600px; margin:0 auto;">
+
+  <a href="/rutas/{{ ruta.id }}/chat" style="font-size:13px; color:var(--texto-suave);">← Volver al chat</a>
+
+  <h1 style="font-size:24px; font-weight:700; margin:16px 0 6px;">Cerrar trato</h1>
+  <p style="color:var(--texto-suave); margin-bottom:20px;">Confirma los detalles finales para formalizar el envío con este transportista.</p>
+
+  <div class="alerta-verde" style="margin-bottom:20px;">
+    🚛 <strong>{{ ruta.transportista.nombre }} {{ ruta.transportista.apellidos }}</strong> · {{ ruta.origen_ciudad }} → {{ ruta.destino_ciudad }} · {{ ruta.fecha_salida.strftime('%d %b %Y') }}
+  </div>
+
+  <div class="card">
+    <form action="/rutas/{{ ruta.id }}/cerrar-trato" method="POST">
+      <div class="form-group">
+        <label>Tipo de mercancía *</label>
+        <input type="text" name="tipo_mercancia" placeholder="Ej. Abarrotes, electrodomésticos..." required>
+      </div>
+      <div class="form-group">
+        <label>Descripción (opcional)</label>
+        <textarea name="descripcion" rows="2" placeholder="Detalles adicionales..."></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Peso (kg) *</label>
+          <input type="number" name="peso_kg" placeholder="Ej. 5000" min="1" max="{{ ruta.capacidad_disponible_kg | int }}" required>
+        </div>
+        <div class="form-group">
+          <label>Precio acordado (MXN) *</label>
+          <input type="number" name="precio_acordado_mxn" placeholder="{{ ruta.precio_fijo | int if ruta.precio_fijo else '' }}" min="1" required>
+        </div>
+      </div>
+
+      <div class="alerta-amber" style="margin-bottom:16px;">
+        ⚠️ Al cerrar el trato se creará un envío formal y el transportista dejará de estar disponible. Después podrás generar la Carta Porte y procesar el pago.
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:15px; justify-content:center;">
+        Confirmar y cerrar trato →
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
