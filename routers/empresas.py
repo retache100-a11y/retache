@@ -41,7 +41,10 @@ async def perfil_empresa(
 
     cargas_activas = (
         db.query(Carga)
-        .filter(Carga.empresa_id == empresa_id, Carga.estado == EstadoCarga.disponible)
+        .filter(
+            Carga.empresa_id == empresa_id,
+            Carga.estado == EstadoCarga.disponible,
+        )
         .order_by(Carga.fecha_publicacion.desc())
         .all()
     )
@@ -158,3 +161,27 @@ async def publicar_carga(
     db.refresh(nueva_carga)
 
     return RedirectResponse(url=f"/cargas/{nueva_carga.id}?publicada=exitoso", status_code=303)
+
+
+@router.post("/{empresa_id}/cancelar-carga/{carga_id}")
+async def cancelar_carga(
+    empresa_id: int,
+    carga_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    sesion = get_sesion_actual(request)
+    if not sesion or sesion.get("tipo") != "empresa":
+        return RedirectResponse(url="/login", status_code=303)
+
+    carga = db.query(Carga).filter(
+        Carga.id == carga_id,
+        Carga.empresa_id == empresa_id,
+        Carga.estado == EstadoCarga.disponible,
+    ).first()
+
+    if carga:
+        carga.estado = EstadoCarga.cancelada
+        db.commit()
+
+    return RedirectResponse(url=f"/empresas/{empresa_id}", status_code=303)

@@ -58,8 +58,16 @@
   <h2 style="font-size:18px; font-weight:600; margin-bottom:12px;">Cargas activas</h2>
   {% for carga in cargas_activas %}
   <a href="/cargas/{{ carga.id }}" style="text-decoration:none; display:block;">
-    <div class="carga-card">
-      <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><strong style="color:var(--texto);">{{ carga.tipo_mercancia }}</strong><span class="badge badge-verde">Disponible</span></div>
+   <div class="carga-card">
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <strong style="color:var(--texto);">{{ carga.tipo_mercancia }}</strong>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span class="badge badge-verde">Disponible</span>
+          <form action="/empresas/{{ empresa.id }}/cancelar-carga/{{ carga.id }}" method="POST" style="display:inline;">
+            <button type="submit" class="btn" style="font-size:12px; padding:4px 10px; color:var(--rojo); border-color:var(--rojo-bg);" onclick="return confirm('¿Cancelar esta carga?')">✕ Cancelar</button>
+          </form>
+        </div>
+      </div>
       <div style="font-size:13px; color:var(--texto-suave); margin-bottom:6px;">📍 {{ carga.origen_ciudad }} → {{ carga.destino_ciudad }}</div>
       <div class="carga-meta"><span>⚖️ {{ carga.peso_kg | int }} kg</span><span>📅 {{ carga.fecha_recoleccion.strftime('%d %b %Y') }}</span><span class="carga-precio">${{ "{:,.0f}".format(carga.precio_ofrecido_mxn) }}</span></div>
     </div>
