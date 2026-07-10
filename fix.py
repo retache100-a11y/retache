@@ -1,4 +1,4 @@
-{% extends "admin/base_admin.html" %}
+content = """{% extends "admin/base_admin.html" %}
 {% block title %}Cargas{% endblock %}
 {% block content %}
 <div class="page-title">Todas las cargas ({{ cargas|length }})</div>
@@ -40,4 +40,8 @@
     </tbody>
   </table>
 </div>
-{% endblock %}
+{% endblock %}"""
+
+with open('templates/admin/cargas.html', 'w', encoding='utf-8') as f:
+    f.write(content)
+print("Archivo guardado correctamente")
