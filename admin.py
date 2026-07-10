@@ -177,3 +177,22 @@ async def verificar_transportista(request: Request, t_id: int, db: Session = Dep
         t.carta_porte_habilitada = True
         db.commit()
     return RedirectResponse(url="/admin/transportistas", status_code=303)
+
+@router.post("/cargas/{carga_id}/eliminar")
+async def eliminar_carga(request: Request, carga_id: int, db: Session = Depends(get_db)):
+    requiere_admin(request)
+    carga = db.query(Carga).filter(Carga.id == carga_id).first()
+    if carga:
+        db.delete(carga)
+        db.commit()
+    return RedirectResponse(url="/admin/cargas", status_code=303)
+
+
+@router.post("/transportistas/{t_id}/eliminar")
+async def eliminar_transportista(request: Request, t_id: int, db: Session = Depends(get_db)):
+    requiere_admin(request)
+    t = db.query(Transportista).filter(Transportista.id == t_id).first()
+    if t:
+        db.delete(t)
+        db.commit()
+    return RedirectResponse(url="/admin/transportistas", status_code=303)

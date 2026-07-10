@@ -1,48 +1,50 @@
-{% extends "base.html" %}
-{% block title %}Cargas disponibles{% endblock %}
+{% extends "admin/base_admin.html" %}
+{% block title %}Cargas{% endblock %}
 {% block content %}
-<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-  <h1 style="font-size:24px; font-weight:700;">Cargas disponibles</h1>
-  <span class="badge badge-verde" style="font-size:14px; padding:6px 16px;">{{ cargas | length }} cargas activas</span>
+
+<div class="page-title">Todas las cargas ({{ cargas|length }})</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Mercancia</th>
+        <th>Ruta</th>
+        <th>Empresa</th>
+        <th>Transportista</th>
+        <th>Precio</th>
+        <th>Estado</th>
+        <th>Fecha</th>
+        <th>Accion</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in cargas %}
+      <tr>
+        <td style="font-weight:500; color:#E8E8E6;">{{ c.tipo_mercancia }}</td>
+        <td style="font-size:12px;">{{ c.origen_ciudad }} - {{ c.destino_ciudad }}</td>
+        <td style="font-size:12px;">{{ c.empresa.razon_social if c.empresa else '-' }}</td>
+        <td style="font-size:12px;">
+          {% if c.transportista %}{{ c.transportista.nombre }} {{ c.transportista.apellidos }}
+          {% else %}<span style="color:#8B8B8B;">Sin asignar</span>{% endif %}
+        </td>
+        <td>${{ "{:,.0f}".format(c.precio_ofrecido_mxn) }}</td>
+        <td>
+          {% if c.estado == 'disponible' %}<span class="badge badge-verde">Disponible</span>
+          {% elif c.estado == 'asignada' %}<span class="badge badge-azul">Asignada</span>
+          {% elif c.estado == 'completada' %}<span class="badge badge-verde">Completada</span>
+          {% else %}<span class="badge badge-rojo">{{ c.estado }}</span>{% endif %}
+        </td>
+        <td style="font-size:12px; color:#8B8B8B;">{{ c.fecha_publicacion.strftime('%d %b %Y') }}</td>
+        <td>
+          <form action="/admin/cargas/{{ c.id }}/eliminar" method="POST" onsubmit="return confirm('Eliminar esta carga?')">
+            <button type="submit" class="btn btn-rojo" style="font-size:12px;">Eliminar</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
-<form method="GET" action="/cargas" style="background:#fff; border:1px solid var(--gris-borde); border-radius:12px; padding:16px; margin-bottom:20px; display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
-  <div class="form-group" style="margin:0; flex:1; min-width:140px;"><label>Origen</label><input type="text" name="origen" value="{{ filtro_origen }}" placeholder="Ej. Zamora"></div>
-  <div class="form-group" style="margin:0; flex:1; min-width:140px;"><label>Destino</label><input type="text" name="destino" value="{{ filtro_destino }}" placeholder="Ej. CDMX"></div>
-  <div class="form-group" style="margin:0; flex:1; min-width:160px;">
-    <label>Tipo de vehículo</label>
-    <select name="tipo_vehiculo">
-      <option value="">Todos</option>
-      <option {% if filtro_vehiculo=='C2 (2 ejes)' %}selected{% endif %}>C2 (2 ejes)</option>
-      <option {% if filtro_vehiculo=='C3 (3 ejes)' %}selected{% endif %}>C3 (3 ejes)</option>
-      <option {% if filtro_vehiculo=='Rabón' %}selected{% endif %}>Rabón</option>
-      <option {% if filtro_vehiculo=='Torton' %}selected{% endif %}>Torton</option>
-      <option {% if filtro_vehiculo=='Trailer (T3-S2)' %}selected{% endif %}>Trailer (T3-S2)</option>
-    </select>
-  </div>
-  <button type="submit" class="btn btn-primary">Buscar</button>
-  {% if filtro_origen or filtro_destino or filtro_vehiculo %}<a href="/cargas" class="btn">Limpiar</a>{% endif %}
-</form>
-{% for carga in cargas %}
-<a href="/cargas/{{ carga.id }}" style="text-decoration:none; display:block;">
-  <div class="carga-card">
-    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-      <strong style="color:var(--texto);">{{ carga.tipo_mercancia }}</strong>
-      <span class="badge badge-verde">Disponible</span>
-    </div>
-    <div style="font-size:14px; color:var(--texto-suave); margin-bottom:8px;">📍 <strong style="color:var(--texto);">{{ carga.origen_ciudad }}, {{ carga.origen_estado }}</strong> → <strong style="color:var(--texto);">{{ carga.destino_ciudad }}, {{ carga.destino_estado }}</strong></div>
-    <div class="carga-meta">
-      <span>⚖️ {{ carga.peso_kg | int }} kg</span>
-      <span>🚛 {{ carga.tipo_vehiculo_requerido or 'Cualquier tipo' }}</span>
-      <span>📅 {{ carga.fecha_recoleccion.strftime('%d %b %Y') }}</span>
-      <span class="carga-precio">${{ "{:,.0f}".format(carga.precio_ofrecido_mxn) }}{% if carga.precio_negociable %} <span style="font-size:12px; font-weight:400;">(negociable)</span>{% endif %}</span>
-    </div>
-  </div>
-</a>
-{% else %}
-<div style="text-align:center; padding:48px; color:var(--texto-suave);">
-  <div style="font-size:40px; margin-bottom:12px;">📦</div>
-  No hay cargas disponibles.<br><br>
-  <a href="/dev/cargar-datos-prueba" class="btn btn-primary">Cargar datos de prueba →</a>
-</div>
-{% endfor %}
+
 {% endblock %}

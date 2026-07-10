@@ -391,3 +391,4 @@ async def cargar_datos_prueba(db: Session = Depends(get_db)):
     notificar_nueva_carga(db, c2.id)
 
     return {"mensaje": "✅ Datos de prueba creados con notificaciones", "transportistas": 2, "empresa": 1, "cargas": 2}
+
