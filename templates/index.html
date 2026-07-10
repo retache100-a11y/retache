@@ -38,7 +38,21 @@
       lista.forEach(t => {
         L.circleMarker([t.lat, t.lng], { radius: 10, fillColor: '#1D9E75', color: '#fff', weight: 2, fillOpacity: 0.9 })
           .addTo(mapa)
-          .bindPopup(`<strong>${t.nombre}</strong><br>${t.tipo_vehiculo} · ${t.capacidad_kg.toLocaleString()} kg<br>⭐ ${t.calificacion}<br><a href="/transportistas/${t.id}">Ver perfil →</a>`);
+          .bindPopup(`
+  <div style="font-family:-apple-system,sans-serif; min-width:180px;">
+    <strong style="font-size:14px;">${t.nombre}</strong><br>
+    <span style="color:#6B6B68; font-size:12px;">${t.tipo_vehiculo} · ${t.capacidad_kg.toLocaleString()} kg</span><br>
+    <span style="color:#BA7517;">⭐ ${t.calificacion}</span>
+    <span style="color:#6B6B68; font-size:12px;"> · ${t.total_viajes} viajes</span><br>
+    <span style="font-size:12px; color:${t.carta_porte ? '#27500A' : '#A32D2D'};">
+      ${t.carta_porte ? '✅ Carta Porte habilitada' : '⚠️ Docs pendientes'}
+    </span><br><br>
+    <a href="/transportistas/${t.id}"
+      style="background:#0E6BB8;color:#fff;padding:6px 14px;border-radius:6px;font-size:13px;text-decoration:none;display:inline-block;">
+      Ver perfil →
+    </a>
+  </div>
+`);
       });
     });
 </script>

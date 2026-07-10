@@ -72,6 +72,51 @@
   {% endif %}
   <div style="display:flex; gap:10px; flex-wrap:wrap;">
     <a href="/cargas" class="btn btn-primary">Ver cargas disponibles →</a>
+    {% if sesion and sesion.id == transportista.id %}
+    <button id="btn-disponibilidad" onclick="toggleDisponibilidad()" class="btn"
+      style="background:{% if transportista.disponible %}#FCEBEB{% else %}var(--verde-bg){% endif %};
+      color:{% if transportista.disponible %}var(--rojo){% else %}var(--verde){% endif %};">
+      {% if transportista.disponible %}● Desactivar disponibilidad{% else %}● Activar disponibilidad{% endif %}
+    </button>
+    {% endif %}
   </div>
+
+<script>
+function toggleDisponibilidad() {
+  const disponible = {{ 'true' if transportista.disponible else 'false' }};
+
+  if (disponible) {
+    fetch('/transportistas/api/desactivar-disponibilidad', { method: 'POST' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok) location.reload();
+      });
+  } else {
+    if (!navigator.geolocation) {
+      alert('Tu navegador no soporta geolocalización.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        fetch('/transportistas/api/actualizar-ubicacion', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lat: pos.coords.latitude, lng: pos.coords.longitude })
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (data.ok) {
+            alert('¡Ya apareces en el mapa! Las empresas pueden verte.');
+            location.reload();
+          }
+        });
+      },
+      function(err) {
+        alert('No pudimos obtener tu ubicación. Asegúrate de dar permiso de ubicación en tu navegador.');
+      }
+    );
+  }
+}
+</script>
 </div>
 {% endblock %}

@@ -170,3 +170,45 @@ async def registrar_transportista(
     response = RedirectResponse(url=f"/transportistas/{nuevo.id}?registro=exitoso", status_code=303)
     response.set_cookie(key="retache_sesion", value=token, httponly=True, max_age=86400, samesite="lax")
     return response
+
+@router.post("/api/actualizar-ubicacion")
+async def actualizar_ubicacion(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    sesion = get_sesion_actual(request)
+    if not sesion or sesion.get("tipo") != "transportista":
+        return {"error": "No autorizado"}
+
+    data = await request.json()
+    lat = data.get("lat")
+    lng = data.get("lng")
+
+    if not lat or not lng:
+        return {"error": "Coordenadas inválidas"}
+
+    t = db.query(Transportista).filter(Transportista.id == sesion["id"]).first()
+    if t:
+        t.latitud = lat
+        t.longitud = lng
+        t.disponible = True
+        db.commit()
+
+    return {"ok": True, "lat": lat, "lng": lng}
+
+
+@router.post("/api/desactivar-disponibilidad")
+async def desactivar_disponibilidad(
+    request: Request,
+    db: Session = Depends(get_db),
+):
+    sesion = get_sesion_actual(request)
+    if not sesion or sesion.get("tipo") != "transportista":
+        return {"error": "No autorizado"}
+
+    t = db.query(Transportista).filter(Transportista.id == sesion["id"]).first()
+    if t:
+        t.disponible = False
+        db.commit()
+
+    return {"ok": True}
