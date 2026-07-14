@@ -71,7 +71,9 @@
   </div>
   {% endif %}
   <div style="display:flex; gap:10px; flex-wrap:wrap;">
-    <a href="/cargas" class="btn btn-primary">Ver cargas disponibles →</a>
+    {% if sesion and sesion.tipo == 'transportista' %}
+<a href="/cargas" class="btn btn-primary">Ver cargas disponibles →</a>
+{% endif %}
     {% if sesion and sesion.id == transportista.id %}
     <button id="btn-disponibilidad" onclick="toggleDisponibilidad()" class="btn"
       style="background:{% if transportista.disponible %}#FCEBEB{% else %}var(--verde-bg){% endif %};
