@@ -16,8 +16,8 @@ from auth import get_sesion_actual, hash_contrasena, crear_sesion
 router = APIRouter(prefix="/admin", tags=["admin"])
 templates = Jinja2Templates(directory="templates")
 
-ADMIN_EMAIL = "admin@retache.mx"
-ADMIN_PASSWORD = hash_contrasena("Admin2025Retache")
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "admin@retache.mx")
+ADMIN_PASSWORD = hash_contrasena(os.environ.get("ADMIN_PASSWORD", "cambiar-esta-clave"))
 
 
 def ctx(request, **kwargs):
