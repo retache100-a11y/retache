@@ -10,7 +10,7 @@ from sqlalchemy import func
 from datetime import datetime
 
 from database import get_db
-from models import Transportista, Empresa, Carga, Mensaje, Notificacion, EstadoCarga
+from models import Transportista, Empresa, Carga, Mensaje, Notificacion, EstadoCarga, RutaDisponible, MensajeRuta
 from auth import get_sesion_actual, hash_contrasena, crear_sesion
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -223,3 +223,26 @@ async def detalle_empresa(request: Request, e_id: int, db: Session = Depends(get
         e=e,
         cargas=cargas,
     ))
+
+@router.get("/rutas", response_class=HTMLResponse)
+async def lista_rutas_admin(request: Request, db: Session = Depends(get_db)):
+    requiere_admin(request)
+    rutas = (
+        db.query(RutaDisponible)
+        .order_by(RutaDisponible.fecha_publicacion.desc())
+        .all()
+    )
+    return templates.TemplateResponse("admin/rutas.html", ctx(request,
+        rutas=rutas,
+    ))
+
+
+@router.post("/rutas/{ruta_id}/eliminar")
+async def eliminar_ruta_admin(request: Request, ruta_id: int, db: Session = Depends(get_db)):
+    requiere_admin(request)
+    ruta = db.query(RutaDisponible).filter(RutaDisponible.id == ruta_id).first()
+    if ruta:
+        db.query(MensajeRuta).filter(MensajeRuta.ruta_id == ruta_id).delete()
+        db.delete(ruta)
+        db.commit()
+    return RedirectResponse(url="/admin/rutas", status_code=303)

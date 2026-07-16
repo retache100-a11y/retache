@@ -1,0 +1,61 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Rutas{% endblock %}
+{% block content %}
+
+<div class="page-title">Rutas de regreso publicadas ({{ rutas|length }})</div>
+
+<div class="card">
+  <table>
+    <thead>
+      <tr>
+        <th>Transportista</th>
+        <th>Ruta</th>
+        <th>Salida</th>
+        <th>Capacidad</th>
+        <th>Precio</th>
+        <th>Mensajes</th>
+        <th>Estado</th>
+        <th>Publicada</th>
+        <th>Accion</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rutas %}
+      <tr>
+        <td>
+          {% if r.transportista %}
+          <div style="font-weight:500; color:#E8E8E6;">{{ r.transportista.nombre }} {{ r.transportista.apellidos }}</div>
+          <div style="font-size:12px; color:#8B8B8B;">{{ r.transportista.tipo_vehiculo or '-' }}</div>
+          {% else %}-{% endif %}
+        </td>
+        <td style="font-size:12px;">{{ r.origen_ciudad }} - {{ r.destino_ciudad }}</td>
+        <td style="font-size:12px;">{{ r.fecha_salida.strftime('%d %b %Y') }}</td>
+        <td style="font-size:12px;">{{ "{:,.0f}".format(r.capacidad_disponible_kg) }} kg</td>
+        <td>
+          {% if r.precio_fijo %}${{ "{:,.0f}".format(r.precio_fijo) }}
+          {% else %}<span style="color:#FCD34D;">Negociable</span>{% endif %}
+        </td>
+        <td>{{ r.mensajes|length }}</td>
+        <td>
+          {% if r.activa %}<span class="badge badge-verde">Activa</span>
+          {% else %}<span class="badge badge-rojo">Inactiva</span>{% endif %}
+        </td>
+        <td style="font-size:12px; color:#8B8B8B;">{{ r.fecha_publicacion.strftime('%d %b %Y') if r.fecha_publicacion else '-' }}</td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            {% if r.transportista %}
+            <a href="/admin/transportistas/{{ r.transportista.id }}/detalle" class="btn btn-gris">Ver perfil</a>
+            {% endif %}
+            <form action="/admin/rutas/{{ r.id }}/eliminar" method="POST" style="display:inline;" onsubmit="return confirm('Eliminar esta ruta y su conversacion?')">
+              <button type="submit" class="btn btn-rojo">Eliminar</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9" style="text-align:center; color:#8B8B8B; padding:24px;">No hay rutas publicadas aun.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
