@@ -1,0 +1,107 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Detalle transportista{% endblock %}
+{% block content %}
+
+<a href="/admin/transportistas" style="font-size:13px; color:#8B8B8B;">&larr; Volver a transportistas</a>
+
+<div class="page-title" style="margin-top:12px;">{{ t.nombre }} {{ t.apellidos }}</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+  <div class="card">
+    <div class="card-title">Datos personales</div>
+    <table>
+      <tr><td style="color:#8B8B8B;">ID interno</td><td>{{ t.id }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Nombre completo</td><td>{{ t.nombre }} {{ t.apellidos }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Correo</td><td>{{ t.email }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Telefono</td><td>{{ t.telefono }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Fecha de registro</td><td>{{ t.fecha_registro.strftime('%d %b %Y - %H:%M') if t.fecha_registro else '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Email verificado</td><td>
+        {% if t.email_verificado %}<span class="badge badge-verde">Si</span>
+        {% else %}<span class="badge badge-amber">No</span>{% endif %}
+      </td></tr>
+      <tr><td style="color:#8B8B8B;">Cuenta activa</td><td>
+        {% if t.activo %}<span class="badge badge-verde">Activa</span>
+        {% else %}<span class="badge badge-rojo">Inactiva</span>{% endif %}
+      </td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Datos fiscales y documentos</div>
+    <table>
+      <tr><td style="color:#8B8B8B;">RFC</td><td style="font-family:monospace;">{{ t.rfc }}</td></tr>
+      <tr><td style="color:#8B8B8B;">RFC verificado</td><td>
+        {% if t.rfc_verificado %}<span class="badge badge-verde">Si</span>
+        {% else %}<span class="badge badge-amber">No</span>{% endif %}
+      </td></tr>
+      <tr><td style="color:#8B8B8B;">Licencia federal SICT</td><td style="font-family:monospace;">{{ t.num_licencia_federal or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Estado licencia</td><td>{{ t.licencia_estado or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Vence licencia</td><td>{{ t.licencia_vencimiento.strftime('%d %b %Y') if t.licencia_vencimiento else '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Poliza de seguro</td><td style="font-family:monospace;">{{ t.num_poliza_seguro or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Estado seguro</td><td>{{ t.seguro_estado or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Vence seguro</td><td>{{ t.seguro_vencimiento.strftime('%d %b %Y') if t.seguro_vencimiento else '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Cobertura seguro</td><td>{% if t.seguro_cobertura_mxn %}${{ "{:,.0f}".format(t.seguro_cobertura_mxn) }}{% else %}-{% endif %}</td></tr>
+      <tr><td style="color:#8B8B8B;">Verificacion vehicular</td><td>{{ t.verificacion_vehicular_estado or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Tarjeta de circulacion</td><td>{{ t.tarjeta_circulacion_estado or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Carta Porte habilitada</td><td>
+        {% if t.carta_porte_habilitada %}<span class="badge badge-verde">Si</span>
+        {% else %}<span class="badge badge-rojo">No</span>{% endif %}
+      </td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Vehiculo</div>
+    <table>
+      <tr><td style="color:#8B8B8B;">Tipo</td><td>{{ t.tipo_vehiculo or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Marca</td><td>{{ t.marca_vehiculo or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Modelo</td><td>{{ t.modelo_vehiculo or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Anio</td><td>{{ t.anio_vehiculo or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Placa</td><td style="font-family:monospace;">{{ t.placa or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Capacidad</td><td>{% if t.capacidad_kg %}{{ "{:,.0f}".format(t.capacidad_kg) }} kg{% else %}-{% endif %}</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Actividad y ubicacion</div>
+    <table>
+      <tr><td style="color:#8B8B8B;">Disponible ahora</td><td>
+        {% if t.disponible %}<span class="badge badge-verde">Si</span>
+        {% else %}<span class="badge badge-rojo">No</span>{% endif %}
+      </td></tr>
+      <tr><td style="color:#8B8B8B;">Ultima ubicacion</td><td>
+        {% if t.latitud and t.longitud %}{{ "%.5f"|format(t.latitud) }}, {{ "%.5f"|format(t.longitud) }}{% else %}Sin registrar{% endif %}
+      </td></tr>
+      <tr><td style="color:#8B8B8B;">Calificacion</td><td>{{ "%.1f"|format(t.calificacion_promedio) }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Total de viajes</td><td>{{ t.total_viajes }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Puntualidad</td><td>{{ "%.0f"|format(t.porcentaje_puntualidad) }}%</td></tr>
+      <tr><td style="color:#8B8B8B;">Rutas frecuentes</td><td>{{ t.rutas_frecuentes or '-' }}</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<div class="card" style="margin-top:20px;">
+  <div class="card-title">Cargas asignadas ({{ cargas|length }})</div>
+  <table>
+    <thead>
+      <tr><th>Mercancia</th><th>Ruta</th><th>Precio</th><th>Estado</th><th>Fecha</th></tr>
+    </thead>
+    <tbody>
+      {% for c in cargas %}
+      <tr>
+        <td>{{ c.tipo_mercancia }}</td>
+        <td>{{ c.origen_ciudad }} - {{ c.destino_ciudad }}</td>
+        <td>${{ "{:,.0f}".format(c.precio_ofrecido_mxn) }}</td>
+        <td>{{ c.estado }}</td>
+        <td>{{ c.fecha_publicacion.strftime('%d %b %Y') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" style="text-align:center; color:#8B8B8B; padding:20px;">Sin cargas asignadas</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

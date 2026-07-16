@@ -178,6 +178,7 @@ async def verificar_transportista(request: Request, t_id: int, db: Session = Dep
         db.commit()
     return RedirectResponse(url="/admin/transportistas", status_code=303)
 
+
 @router.post("/cargas/{carga_id}/eliminar")
 async def eliminar_carga(request: Request, carga_id: int, db: Session = Depends(get_db)):
     requiere_admin(request)
@@ -196,3 +197,29 @@ async def eliminar_transportista(request: Request, t_id: int, db: Session = Depe
         db.delete(t)
         db.commit()
     return RedirectResponse(url="/admin/transportistas", status_code=303)
+
+
+@router.get("/transportistas/{t_id}/detalle", response_class=HTMLResponse)
+async def detalle_transportista(request: Request, t_id: int, db: Session = Depends(get_db)):
+    requiere_admin(request)
+    t = db.query(Transportista).filter(Transportista.id == t_id).first()
+    if not t:
+        raise HTTPException(status_code=404, detail="Transportista no encontrado")
+    cargas = db.query(Carga).filter(Carga.transportista_id == t_id).all()
+    return templates.TemplateResponse("admin/detalle_transportista.html", ctx(request,
+        t=t,
+        cargas=cargas,
+    ))
+
+
+@router.get("/empresas/{e_id}/detalle", response_class=HTMLResponse)
+async def detalle_empresa(request: Request, e_id: int, db: Session = Depends(get_db)):
+    requiere_admin(request)
+    e = db.query(Empresa).filter(Empresa.id == e_id).first()
+    if not e:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+    cargas = db.query(Carga).filter(Carga.empresa_id == e_id).all()
+    return templates.TemplateResponse("admin/detalle_empresa.html", ctx(request,
+        e=e,
+        cargas=cargas,
+    ))

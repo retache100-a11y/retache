@@ -1,0 +1,94 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Detalle empresa{% endblock %}
+{% block content %}
+
+<a href="/admin/empresas" style="font-size:13px; color:#8B8B8B;">&larr; Volver a empresas</a>
+
+<div class="page-title" style="margin-top:12px;">{{ e.razon_social }}</div>
+
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+
+  <div class="card">
+    <div class="card-title">Datos de la empresa</div>
+    <table>
+      <tr><td style="color:#8B8B8B;">ID interno</td><td>{{ e.id }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Razon social</td><td>{{ e.razon_social }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Nombre comercial</td><td>{{ e.nombre_comercial or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Giro</td><td>{{ e.giro or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Correo</td><td>{{ e.email }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Telefono</td><td>{{ e.telefono }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Fecha de registro</td><td>{{ e.fecha_registro.strftime('%d %b %Y - %H:%M') if e.fecha_registro else '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Email verificado</td><td>
+        {% if e.email_verificado %}<span class="badge badge-verde">Si</span>
+        {% else %}<span class="badge badge-amber">No</span>{% endif %}
+      </td></tr>
+      <tr><td style="color:#8B8B8B;">Cuenta activa</td><td>
+        {% if e.activo %}<span class="badge badge-verde">Activa</span>
+        {% else %}<span class="badge badge-rojo">Inactiva</span>{% endif %}
+      </td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Datos fiscales y legales</div>
+    <table>
+      <tr><td style="color:#8B8B8B;">RFC</td><td style="font-family:monospace;">{{ e.rfc }}</td></tr>
+      <tr><td style="color:#8B8B8B;">RFC verificado</td><td>
+        {% if e.rfc_verificado %}<span class="badge badge-verde">Si</span>
+        {% else %}<span class="badge badge-amber">No</span>{% endif %}
+      </td></tr>
+      <tr><td style="color:#8B8B8B;">Acta constitutiva</td><td style="font-family:monospace;">{{ e.num_acta_constitutiva or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Acta verificada</td><td>
+        {% if e.acta_constitutiva_verificada %}<span class="badge badge-verde">Si</span>
+        {% else %}<span class="badge badge-amber">No</span>{% endif %}
+      </td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Domicilio</div>
+    <table>
+      <tr><td style="color:#8B8B8B;">Calle</td><td>{{ e.calle or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Colonia</td><td>{{ e.colonia or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Municipio</td><td>{{ e.municipio or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Estado</td><td>{{ e.estado or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Codigo postal</td><td>{{ e.cp or '-' }}</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Contacto y actividad</div>
+    <table>
+      <tr><td style="color:#8B8B8B;">Nombre de contacto</td><td>{{ e.nombre_contacto or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Puesto</td><td>{{ e.puesto_contacto or '-' }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Calificacion</td><td>{{ "%.1f"|format(e.calificacion_promedio) }}</td></tr>
+      <tr><td style="color:#8B8B8B;">Cargas publicadas</td><td>{{ e.total_cargas_publicadas }}</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<div class="card" style="margin-top:20px;">
+  <div class="card-title">Cargas publicadas ({{ cargas|length }})</div>
+  <table>
+    <thead>
+      <tr><th>Mercancia</th><th>Ruta</th><th>Transportista</th><th>Precio</th><th>Estado</th><th>Fecha</th></tr>
+    </thead>
+    <tbody>
+      {% for c in cargas %}
+      <tr>
+        <td>{{ c.tipo_mercancia }}</td>
+        <td>{{ c.origen_ciudad }} - {{ c.destino_ciudad }}</td>
+        <td>{% if c.transportista %}{{ c.transportista.nombre }} {{ c.transportista.apellidos }}{% else %}Sin asignar{% endif %}</td>
+        <td>${{ "{:,.0f}".format(c.precio_ofrecido_mxn) }}</td>
+        <td>{{ c.estado }}</td>
+        <td>{{ c.fecha_publicacion.strftime('%d %b %Y') }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6" style="text-align:center; color:#8B8B8B; padding:20px;">Sin cargas publicadas</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}
