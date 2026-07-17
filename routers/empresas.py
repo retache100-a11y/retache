@@ -21,9 +21,14 @@ def ctx(request, **kwargs):
     return {"request": request, "sesion": get_sesion_actual(request), **kwargs}
 
 
+def limpiar_rfc(rfc: str) -> str:
+    return re.sub(r'[\s\-\.]', '', rfc or '').upper().strip()
+
+
 def validar_rfc_empresa(rfc: str) -> bool:
-    patron = r'^[A-Z]{3}\d{6}[A-Z0-9]{3}$'
-    return bool(re.match(patron, rfc.upper()))
+    moral = r'^[A-Z&]{3}\d{6}[A-Z0-9]{3}$'
+    fisica = r'^[A-Z&]{4}\d{6}[A-Z0-9]{3}$'
+    return bool(re.match(moral, rfc) or re.match(fisica, rfc))
 
 
 @router.get("/registro", response_class=HTMLResponse)
@@ -72,26 +77,42 @@ async def registrar_empresa(
     cp: str = Form(""),
     db: Session = Depends(get_db),
 ):
-    rfc_upper = rfc.upper().strip()
-    if not validar_rfc_empresa(rfc_upper):
-        raise HTTPException(status_code=400, detail="RFC inválido para empresa.")
+    rfc_limpio = limpiar_rfc(rfc)
 
-    existente = db.query(Empresa).filter(
-        (Empresa.email == email) | (Empresa.rfc == rfc_upper)
-    ).first()
-    if existente:
-        raise HTTPException(status_code=400, detail="Ya existe una cuenta con ese email o RFC.")
+    if not validar_rfc_empresa(rfc_limpio):
+        return templates.TemplateResponse("registro_empresa.html", ctx(request,
+            error="El RFC no tiene un formato válido. Usa 12 caracteres si eres persona moral (ej. ABC010101XY1) o 13 si eres persona física con actividad empresarial (ej. ABCD800101XY1)."
+        ))
+
+    if len(contrasena) < 8:
+        return templates.TemplateResponse("registro_empresa.html", ctx(request,
+            error="La contraseña debe tener al menos 8 caracteres."
+        ))
+
+    email_limpio = email.lower().strip()
+
+    if db.query(Empresa).filter(Empresa.email == email_limpio).first():
+        return templates.TemplateResponse("registro_empresa.html", ctx(request,
+            error="Ya existe una cuenta registrada con ese correo electrónico."
+        ))
+
+    if db.query(Empresa).filter(Empresa.rfc == rfc_limpio).first():
+        return templates.TemplateResponse("registro_empresa.html", ctx(request,
+            error="Ya existe una cuenta registrada con ese RFC."
+        ))
 
     if not num_acta_constitutiva or len(num_acta_constitutiva.strip()) < 3:
-        raise HTTPException(status_code=400, detail="El número de acta constitutiva es requerido.")
+        return templates.TemplateResponse("registro_empresa.html", ctx(request,
+            error="El número de acta constitutiva es obligatorio."
+        ))
 
     nueva = Empresa(
         razon_social=razon_social.strip(),
         nombre_comercial=nombre_comercial.strip() or razon_social.strip(),
-        email=email.lower().strip(),
+        email=email_limpio,
         telefono=telefono,
         contrasena_hash=hash_contrasena(contrasena),
-        rfc=rfc_upper, rfc_verificado=True,
+        rfc=rfc_limpio, rfc_verificado=True,
         num_acta_constitutiva=num_acta_constitutiva.strip(),
         acta_constitutiva_verificada=True,
         giro=giro,
