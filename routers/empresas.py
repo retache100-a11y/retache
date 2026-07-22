@@ -26,9 +26,7 @@ def limpiar_rfc(rfc: str) -> str:
 
 
 def validar_rfc_empresa(rfc: str) -> bool:
-    moral = r'^[A-Z&]{3}\d{6}[A-Z0-9]{3}$'
-    fisica = r'^[A-Z&]{4}\d{6}[A-Z0-9]{3}$'
-    return bool(re.match(moral, rfc) or re.match(fisica, rfc))
+    return bool(re.match(r'^[A-Z0-9]{12,13}$', rfc))
 
 
 @router.get("/registro", response_class=HTMLResponse)
@@ -150,7 +148,7 @@ async def publicar_carga(
     destino_ciudad: str = Form(...),
     destino_estado: str = Form(...),
     fecha_recoleccion: str = Form(...),
-    tipo_vehiculo_requerido: str = Form(...),
+    tipo_vehiculo_requerido: str = Form(""),
     precio_ofrecido_mxn: float = Form(...),
     precio_negociable: bool = Form(True),
     db: Session = Depends(get_db),
@@ -171,7 +169,7 @@ async def publicar_carga(
         origen_ciudad=origen_ciudad, origen_estado=origen_estado,
         destino_ciudad=destino_ciudad, destino_estado=destino_estado,
         fecha_recoleccion=fecha,
-        tipo_vehiculo_requerido=tipo_vehiculo_requerido,
+        tipo_vehiculo_requerido=tipo_vehiculo_requerido.strip() or None,
         precio_ofrecido_mxn=precio_ofrecido_mxn,
         precio_negociable=precio_negociable,
         estado=EstadoCarga.disponible,

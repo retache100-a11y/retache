@@ -21,6 +21,21 @@
     </div>
     {% if carga.descripcion %}<div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--gris-borde);"><div style="font-size:12px; color:var(--texto-suave); margin-bottom:4px;">Descripción</div><p style="font-size:14px;">{{ carga.descripcion }}</p></div>{% endif %}
   </div>
+  {% if sesion and sesion.tipo == 'transportista' and not carga.transportista and carga.estado == 'disponible' %}
+  <div class="card" style="margin-bottom:16px; border-color:var(--verde-claro);">
+    <h2 style="font-size:15px; font-weight:600; margin-bottom:8px;">¿Te interesa esta carga?</h2>
+    <p style="font-size:14px; color:var(--texto-suave); margin-bottom:14px;">
+      Al tomarla quedas asignado como transportista responsable. Podras coordinar los detalles por el chat.
+    </p>
+    <form action="/cargas/{{ carga.id }}/asignar" method="POST">
+      <input type="hidden" name="transportista_id" value="{{ sesion.id }}">
+      <button type="submit" class="btn btn-primary" style="padding:10px 20px; font-size:15px;">
+        Tomar esta carga
+      </button>
+    </form>
+  </div>
+  {% endif %}
+
   {% if carga.transportista %}
   <div class="card" style="margin-bottom:16px; border-color:var(--verde-claro);">
     <h2 style="font-size:15px; font-weight:600; margin-bottom:12px; color:var(--verde);">✅ Transportista asignado</h2>
@@ -29,16 +44,28 @@
       <div><div style="font-weight:600;">{{ carga.transportista.nombre }} {{ carga.transportista.apellidos }}</div><div style="font-size:13px; color:var(--texto-suave);">{{ carga.transportista.tipo_vehiculo }} · ⭐ {{ "%.1f"|format(carga.transportista.calificacion_promedio) }}</div></div>
       <div style="margin-left:auto; display:flex; gap:8px; flex-wrap:wrap;">
         <a href="/transportistas/{{ carga.transportista.id }}" class="btn">Ver perfil</a>
-        {% if not carga.carta_porte_generada %}<a href="/cargas/{{ carga.id }}/carta-porte" class="btn btn-primary">Generar Carta Porte</a>{% else %}<span class="badge badge-verde" style="padding:8px 14px;">📄 Carta Porte generada</span>{% endif %}
+        {% if not carga.carta_porte_generada %}<a href="/cargas/{{ carga.id }}/carta-porte" class="btn">Generar Carta Porte</a>{% else %}<span class="badge badge-verde" style="padding:8px 14px;">📄 Carta Porte generada</span>{% endif %}
+        {% if sesion and sesion.tipo == 'empresa' and sesion.id == carga.empresa_id %}
+        <a href="/pagos/carga/{{ carga.id }}" class="btn btn-primary">💳 Pagar flete →</a>
+        {% endif %}
       </div>
     </div>
+    {% if sesion and sesion.tipo == 'empresa' and sesion.id == carga.empresa_id %}
+    <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--gris-borde);">
+      <div style="font-size:13px; color:var(--texto-suave); margin-bottom:8px;">💰 Ajustar tarifa final (después de negociar en el chat)</div>
+      <form action="/cargas/{{ carga.id }}/ajustar-tarifa" method="POST" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <input type="number" name="precio_final" placeholder="Precio acordado (MXN)" min="1" step="1" style="flex:1; min-width:180px;" required>
+        <button type="submit" class="btn">Guardar tarifa</button>
+      </form>
+    </div>
+    {% endif %}
   </div>
   {% endif %}
   <div class="card" style="margin-bottom:16px;">
     <h2 style="font-size:15px; font-weight:600; margin-bottom:14px;">💬 Mensajes</h2>
     <div style="min-height:100px; max-height:320px; overflow-y:auto; margin-bottom:14px; display:flex; flex-direction:column; gap:8px;">
       {% for msg in mensajes %}
-      {% if msg.remitente_transportista_id %}
+      {% if (sesion.tipo == 'transportista' and msg.remitente_empresa_id) or (sesion.tipo == 'empresa' and msg.remitente_transportista_id) %}
       <div style="max-width:75%;"><div style="background:var(--gris-bg); border-radius:12px; border-bottom-left-radius:3px; padding:10px 14px; font-size:14px;">{{ msg.contenido }}</div><div style="font-size:11px; color:var(--texto-suave); margin-top:3px;">{{ msg.fecha_envio.strftime('%d %b %H:%M') }}</div></div>
       {% else %}
       <div style="max-width:75%; align-self:flex-end;"><div style="background:#185FA5; color:#E6F1FB; border-radius:12px; border-bottom-right-radius:3px; padding:10px 14px; font-size:14px;">{{ msg.contenido }}</div><div style="font-size:11px; color:var(--texto-suave); margin-top:3px; text-align:right;">{{ msg.fecha_envio.strftime('%d %b %H:%M') }}</div></div>
@@ -49,8 +76,8 @@
     </div>
     <form action="/mensajes/enviar" method="POST" style="display:flex; gap:8px;">
       <input type="hidden" name="carga_id" value="{{ carga.id }}">
-      <input type="hidden" name="remitente_tipo" value="empresa">
-      <input type="hidden" name="remitente_id" value="{{ carga.empresa_id }}">
+      <input type="hidden" name="remitente_tipo" value="{{ sesion.tipo }}">
+      <input type="hidden" name="remitente_id" value="{{ sesion.id }}">
       <input type="text" name="contenido" placeholder="Escribe un mensaje..." style="flex:1;" required>
       <button type="submit" class="btn btn-primary">Enviar</button>
     </form>

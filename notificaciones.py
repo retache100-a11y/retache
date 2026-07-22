@@ -8,10 +8,11 @@ from database import SessionLocal
 import json
 
 
-def crear_notificacion(db: Session, transportista_id: int, titulo: str, mensaje: str, url: str = "/cargas"):
+def crear_notificacion(db: Session, transportista_id: int = None, titulo: str = "", mensaje: str = "", url: str = "/cargas", empresa_id: int = None):
     from models import Notificacion
     notif = Notificacion(
         transportista_id=transportista_id,
+        empresa_id=empresa_id,
         titulo=titulo,
         mensaje=mensaje,
         url=url,
@@ -72,30 +73,30 @@ def notificar_nueva_carga(db: Session, carga_id: int):
     return notificados
 
 
-def marcar_leida(db: Session, notificacion_id: int, transportista_id: int):
+def marcar_leida(db: Session, notificacion_id: int, transportista_id: int = None, empresa_id: int = None):
     from models import Notificacion
     notif = db.query(Notificacion).filter(
         Notificacion.id == notificacion_id,
-        Notificacion.transportista_id == transportista_id,
+        (Notificacion.transportista_id == transportista_id) if transportista_id else (Notificacion.empresa_id == empresa_id),
     ).first()
     if notif:
         notif.leida = True
         db.commit()
 
 
-def obtener_notificaciones(db: Session, transportista_id: int, solo_no_leidas: bool = False):
+def obtener_notificaciones(db: Session, transportista_id: int = None, solo_no_leidas: bool = False, empresa_id: int = None):
     from models import Notificacion
     query = db.query(Notificacion).filter(
-        Notificacion.transportista_id == transportista_id
+        (Notificacion.transportista_id == transportista_id) if transportista_id else (Notificacion.empresa_id == empresa_id)
     )
     if solo_no_leidas:
         query = query.filter(Notificacion.leida == False)
     return query.order_by(Notificacion.fecha.desc()).limit(20).all()
 
 
-def contar_no_leidas(db: Session, transportista_id: int) -> int:
+def contar_no_leidas(db: Session, transportista_id: int = None, empresa_id: int = None) -> int:
     from models import Notificacion
     return db.query(Notificacion).filter(
-        Notificacion.transportista_id == transportista_id,
+        (Notificacion.transportista_id == transportista_id) if transportista_id else (Notificacion.empresa_id == empresa_id),
         Notificacion.leida == False,
     ).count()

@@ -91,7 +91,7 @@ class Empresa(Base):
     email = Column(String(120), unique=True, index=True, nullable=False)
     contrasena_hash = Column(String(200), nullable=False)
 
-    rfc = Column(String(12), unique=True, index=True, nullable=False)
+    rfc = Column(String(13), unique=True, index=True, nullable=False)
     rfc_verificado = Column(Boolean, default=False)
 
     num_acta_constitutiva = Column(String(100), nullable=True)
@@ -203,7 +203,8 @@ class Notificacion(Base):
     __tablename__ = "notificaciones"
 
     id = Column(Integer, primary_key=True, index=True)
-    transportista_id = Column(Integer, ForeignKey("transportistas.id"), nullable=False)
+    transportista_id = Column(Integer, ForeignKey("transportistas.id"), nullable=True)
+    empresa_id = Column(Integer, ForeignKey("empresas.id"), nullable=True)
     titulo = Column(String(200), nullable=False)
     mensaje = Column(Text, nullable=False)
     url = Column(String(200), default="/cargas")
@@ -211,6 +212,7 @@ class Notificacion(Base):
     fecha = Column(DateTime, server_default=func.now())
 
     transportista = relationship("Transportista", back_populates="notificaciones")
+    empresa = relationship("Empresa")
 
 
 class RutaDisponible(Base):

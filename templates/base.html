@@ -264,7 +264,7 @@
     {% if sesion and sesion.tipo == 'transportista' %}
     <a href="/rutas/publicar" {% if 'publicar' in request.url.path %}class="activo"{% endif %}>Publicar ruta</a>
     {% endif %}
-    {% if sesion and sesion.tipo == 'transportista' %}
+    {% if sesion %}
     <a href="/notificaciones" style="position:relative; padding:6px 14px;">
       🔔
       {% if notif_count and notif_count > 0 %}

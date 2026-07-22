@@ -41,8 +41,11 @@ app.include_router(cuenta_router)
 def contexto(request: Request, db: Session = None, **kwargs):
     sesion = get_sesion_actual(request)
     notif_count = 0
-    if sesion and sesion.get("tipo") == "transportista" and db:
-        notif_count = contar_no_leidas(db, sesion["id"])
+    if sesion and db:
+        if sesion.get("tipo") == "transportista":
+            notif_count = contar_no_leidas(db, transportista_id=sesion["id"])
+        elif sesion.get("tipo") == "empresa":
+            notif_count = contar_no_leidas(db, empresa_id=sesion["id"])
     return {"request": request, "sesion": sesion, "notif_count": notif_count, **kwargs}
 
 @app.get("/terminos", response_class=HTMLResponse)
@@ -157,9 +160,12 @@ async def cerrar_sesion():
 @app.get("/notificaciones", response_class=HTMLResponse)
 async def pagina_notificaciones(request: Request, db: Session = Depends(get_db)):
     sesion = get_sesion_actual(request)
-    if not sesion or sesion.get("tipo") != "transportista":
+    if not sesion or sesion.get("tipo") not in ("transportista", "empresa"):
         return RedirectResponse(url="/login", status_code=303)
-    notifs = obtener_notificaciones(db, sesion["id"])
+    if sesion["tipo"] == "transportista":
+        notifs = obtener_notificaciones(db, transportista_id=sesion["id"])
+    else:
+        notifs = obtener_notificaciones(db, empresa_id=sesion["id"])
     return templates.TemplateResponse("notificaciones.html", contexto(request, db,
         notificaciones=notifs,
     ))
@@ -171,7 +177,9 @@ async def marcar_notificacion_leida(
 ):
     sesion = get_sesion_actual(request)
     if sesion and sesion.get("tipo") == "transportista":
-        marcar_leida(db, notif_id, sesion["id"])
+        marcar_leida(db, notif_id, transportista_id=sesion["id"])
+    elif sesion and sesion.get("tipo") == "empresa":
+        marcar_leida(db, notif_id, empresa_id=sesion["id"])
     return {"ok": True}
 
 
@@ -181,6 +189,12 @@ async def marcar_todas_leidas(request: Request, db: Session = Depends(get_db)):
     if sesion and sesion.get("tipo") == "transportista":
         db.query(Notificacion).filter(
             Notificacion.transportista_id == sesion["id"],
+            Notificacion.leida == False,
+        ).update({"leida": True})
+        db.commit()
+    elif sesion and sesion.get("tipo") == "empresa":
+        db.query(Notificacion).filter(
+            Notificacion.empresa_id == sesion["id"],
             Notificacion.leida == False,
         ).update({"leida": True})
         db.commit()
@@ -250,6 +264,29 @@ async def asignar_transportista(
     return RedirectResponse(url=f"/cargas/{carga_id}", status_code=303)
 
 
+
+@app.post("/cargas/{carga_id}/ajustar-tarifa")
+async def ajustar_tarifa(
+    carga_id: int,
+    request: Request,
+    precio_final: float = Form(...),
+    db: Session = Depends(get_db),
+):
+    sesion = get_sesion_actual(request)
+    if not sesion or sesion.get("tipo") != "empresa":
+        return RedirectResponse(url="/login", status_code=303)
+
+    carga = db.query(Carga).filter(Carga.id == carga_id).first()
+    if not carga or carga.empresa_id != sesion["id"]:
+        raise HTTPException(status_code=403, detail="No autorizado")
+
+    if precio_final and precio_final > 0:
+        carga.precio_ofrecido_mxn = precio_final
+        carga.precio_negociable = False
+        db.commit()
+
+    return RedirectResponse(url=f"/cargas/{carga_id}", status_code=303)
+
 @app.post("/mensajes/enviar")
 async def enviar_mensaje(
     carga_id: int = Form(...),
@@ -267,6 +304,28 @@ async def enviar_mensaje(
         remitente_empresa_id=remitente_id if remitente_tipo == "empresa" else None,
     )
     db.add(nuevo_mensaje)
+
+    carga = db.query(Carga).filter(Carga.id == carga_id).first()
+    if carga:
+        if remitente_tipo == "transportista":
+            t = db.query(Transportista).filter(Transportista.id == remitente_id).first()
+            nombre = f"{t.nombre} {t.apellidos}" if t else "un transportista"
+            db.add(Notificacion(
+                empresa_id=carga.empresa_id,
+                titulo=f"Nuevo mensaje de {nombre}",
+                mensaje=contenido.strip()[:100],
+                url=f"/cargas/{carga_id}",
+            ))
+        elif remitente_tipo == "empresa" and carga.transportista_id:
+            e = db.query(Empresa).filter(Empresa.id == remitente_id).first()
+            nombre = e.razon_social if e else "una empresa"
+            db.add(Notificacion(
+                transportista_id=carga.transportista_id,
+                titulo=f"Nuevo mensaje de {nombre}",
+                mensaje=contenido.strip()[:100],
+                url=f"/cargas/{carga_id}",
+            ))
+
     db.commit()
     return RedirectResponse(url=f"/cargas/{carga_id}", status_code=303)
 

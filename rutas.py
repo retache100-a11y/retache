@@ -194,6 +194,23 @@ async def enviar_mensaje_ruta(
     db.add(nuevo_mensaje)
 
     ruta = db.query(RutaDisponible).filter(RutaDisponible.id == ruta_id).first()
+
+    if sesion.get("tipo") == "transportista" and ruta:
+        ids_empresas = {
+            m.remitente_empresa_id
+            for m in db.query(MensajeRuta).filter(
+                MensajeRuta.ruta_id == ruta_id,
+                MensajeRuta.remitente_empresa_id != None,
+            ).all()
+        }
+        for eid in ids_empresas:
+            db.add(Notificacion(
+                empresa_id=eid,
+                titulo=f"Nuevo mensaje de {ruta.transportista.nombre if ruta.transportista else 'un transportista'}",
+                mensaje=contenido.strip()[:100],
+                url=f"/rutas/{ruta_id}/chat",
+            ))
+
     if sesion.get("tipo") == "empresa" and ruta:
         empresa = db.query(Empresa).filter(Empresa.id == sesion["id"]).first()
         notif = Notificacion(

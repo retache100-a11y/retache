@@ -23,8 +23,8 @@ def ctx(request, **kwargs):
 
 
 def validar_rfc_persona_fisica(rfc: str) -> bool:
-    patron = r'^[A-Z]{4}\d{6}[A-Z0-9]{3}$'
-    return bool(re.match(patron, rfc.upper()))
+    rfc = re.sub(r'[\s\-\.]', '', rfc or '').upper().strip()
+    return bool(re.match(r'^[A-Z0-9]{12,13}$', rfc))
 
 
 @router.get("/registro", response_class=HTMLResponse)
@@ -124,15 +124,17 @@ async def registrar_transportista(
     capacidad_kg: float = Form(...),
     db: Session = Depends(get_db),
 ):
-    rfc_upper = rfc.upper().strip()
+    rfc_upper = re.sub(r'[\s\-\.]', '', rfc or '').upper().strip()
     if not validar_rfc_persona_fisica(rfc_upper):
-        raise HTTPException(status_code=400, detail="RFC inválido.")
+        return templates.TemplateResponse("registro_transportista.html", ctx(request,
+            error="El RFC no tiene un formato válido. Debe tener 12 o 13 caracteres (ej. ABCD800101XY1)."))
 
     existente = db.query(Transportista).filter(
         (Transportista.email == email) | (Transportista.rfc == rfc_upper)
     ).first()
     if existente:
-        raise HTTPException(status_code=400, detail="Ya existe una cuenta con ese email o RFC.")
+        return templates.TemplateResponse("registro_transportista.html", ctx(request,
+            error="Ya existe una cuenta registrada con ese correo o RFC."))
 
     nuevo = Transportista(
         nombre=nombre, apellidos=apellidos,
