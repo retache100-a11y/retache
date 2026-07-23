@@ -25,6 +25,8 @@ from notificaciones import (
 )
 
 Base.metadata.create_all(bind=engine)
+from database import asegurar_columnas
+asegurar_columnas()
 
 app = FastAPI(title="RETACHE", description="Logística inversa MX", version="1.0.0")
 

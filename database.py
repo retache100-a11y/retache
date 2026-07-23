@@ -30,3 +30,22 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def asegurar_columnas():
+    """Agrega columnas faltantes sin borrar datos (migracion simple)."""
+    from sqlalchemy import text, inspect
+    faltantes = [
+        ("notificaciones", "empresa_id", "INTEGER"),
+    ]
+    insp = inspect(engine)
+    with engine.begin() as conn:
+        for tabla, columna, tipo in faltantes:
+            try:
+                if tabla not in insp.get_table_names():
+                    continue
+                cols = [c["name"] for c in insp.get_columns(tabla)]
+                if columna not in cols:
+                    conn.execute(text(f"ALTER TABLE {tabla} ADD COLUMN {columna} {tipo}"))
+                    print(f"[migracion] Columna agregada: {tabla}.{columna}")
+            except Exception as e:
+                print(f"[migracion] Error en {tabla}.{columna}: {e}")
