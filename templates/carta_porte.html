@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Carta Porte{% endblock %}
+{% block content %}
+<div style="max-width:760px; margin:0 auto;">
+
+  <a href="/cargas/{{ carga.id }}" style="font-size:13px; color:var(--texto-suave);">&larr; Volver a la carga</a>
+
+  <h1 style="font-size:24px; font-weight:700; margin:16px 0 6px;">Carta Porte 3.1</h1>
+  <p style="color:var(--texto-suave); margin-bottom:20px;">Estructura generada con los datos del viaje.</p>
+
+  <div style="background:#FAEEDA; border:1px solid #EF9F27; border-radius:12px; padding:16px 18px; margin-bottom:20px;">
+    <div style="font-weight:600; color:#633806; margin-bottom:4px;">Aviso importante</div>
+    <div style="font-size:14px; color:#633806; line-height:1.6;">
+      RETACHE genera la <strong>estructura</strong> de tu Carta Porte 3.1 con todos los datos listos. El <strong>timbrado oficial ante el SAT</strong> debe realizarse con un PAC autorizado antes de circular. Estamos trabajando para integrarlo proximamente.
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:15px; font-weight:600; margin-bottom:14px;">Emisor</h2>
+    <div class="doc-row"><span>Razon social</span><strong>{{ carta.emisor.razon_social }}</strong></div>
+    <div class="doc-row"><span>RFC</span><strong style="font-family:monospace;">{{ carta.emisor.rfc }}</strong></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:15px; font-weight:600; margin-bottom:14px;">Ubicaciones</h2>
+    <div class="doc-row"><span>Origen</span><strong>{{ carga.origen_ciudad }}, {{ carga.origen_estado }}</strong></div>
+    <div class="doc-row"><span>Destino</span><strong>{{ carga.destino_ciudad }}, {{ carga.destino_estado }}</strong></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:15px; font-weight:600; margin-bottom:14px;">Mercancia</h2>
+    <div class="doc-row"><span>Descripcion</span><strong>{{ carga.tipo_mercancia }}</strong></div>
+    <div class="doc-row"><span>Peso bruto total</span><strong>{{ carga.peso_kg | int }} kg</strong></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:15px; font-weight:600; margin-bottom:14px;">Autotransporte</h2>
+    <div class="doc-row"><span>Placa</span><strong style="font-family:monospace;">{{ carga.transportista.placa or '-' }}</strong></div>
+    <div class="doc-row"><span>Poliza de seguro</span><strong>{{ carga.transportista.num_poliza_seguro or '-' }}</strong></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h2 style="font-size:15px; font-weight:600; margin-bottom:14px;">Figura de transporte</h2>
+    <div class="doc-row"><span>Nombre</span><strong>{{ carga.transportista.nombre }} {{ carga.transportista.apellidos }}</strong></div>
+    <div class="doc-row"><span>RFC</span><strong style="font-family:monospace;">{{ carga.transportista.rfc }}</strong></div>
+    <div class="doc-row"><span>Num. licencia SICT</span><strong>{{ carga.transportista.num_licencia_federal or '-' }}</strong></div>
+  </div>
+
+  <a href="/cargas/{{ carga.id }}" class="btn btn-primary">Volver a la carga</a>
+
+</div>
+{% endblock %}

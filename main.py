@@ -333,7 +333,7 @@ async def enviar_mensaje(
 
 
 @app.get("/cargas/{carga_id}/carta-porte")
-async def generar_carta_porte(carga_id: int, db: Session = Depends(get_db)):
+async def generar_carta_porte(carga_id: int, request: Request, db: Session = Depends(get_db)):
     carga = db.query(Carga).filter(Carga.id == carga_id).first()
     if not carga:
         raise HTTPException(status_code=404, detail="Carga no encontrada")
@@ -365,6 +365,9 @@ async def generar_carta_porte(carga_id: int, db: Session = Depends(get_db)):
     carga.carta_porte_generada = True
     carga.carta_porte_xml = json.dumps(carta, ensure_ascii=False, indent=2)
     db.commit()
-    return carta
+    return templates.TemplateResponse("carta_porte.html", contexto(request, db,
+        carga=carga,
+        carta=carta,
+    ))
 
 
