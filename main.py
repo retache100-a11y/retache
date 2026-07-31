@@ -262,6 +262,14 @@ async def asignar_transportista(
     carga.estado = EstadoCarga.asignada
     carga.fecha_asignacion = datetime.utcnow()
     transportista.disponible = False
+
+    db.add(Notificacion(
+        empresa_id=carga.empresa_id,
+        titulo=f"{transportista.nombre} {transportista.apellidos} tomó tu carga",
+        mensaje=f"{carga.tipo_mercancia}: {carga.origen_ciudad} → {carga.destino_ciudad}. Ya puedes proceder con el pago.",
+        url=f"/cargas/{carga_id}",
+    ))
+
     db.commit()
     return RedirectResponse(url=f"/cargas/{carga_id}", status_code=303)
 
